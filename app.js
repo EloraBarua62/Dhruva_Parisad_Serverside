@@ -1,6 +1,7 @@
 // packages
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require("cookie-parser");
 
 
 // Import files
@@ -13,7 +14,13 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 
 
 // Routes
