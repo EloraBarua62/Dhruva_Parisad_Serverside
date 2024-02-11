@@ -6,6 +6,6 @@ const studentController = require("../controllers/student.controllers");
 
 // Routes
 router.post("/registration", studentController.registration);
-// router.post("/login", studentController.login);
+router.get("/details", studentController.details);
 
 module.exports = router;
