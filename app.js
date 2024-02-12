@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 // Import files
 const userRoute = require('./routers/user.route')
 const studentRoute = require('./routers/student.route')
+const resultRoute = require('./routers/result.route')
 
 
 // Create app
@@ -33,6 +34,7 @@ app.get('/', (req,res) => {
 // User account route
 app.use('/api/v1/user', userRoute);
 app.use('/api/v1/student', studentRoute);
+app.use('/api/v1/result', resultRoute);
 
 
 module.exports = app;

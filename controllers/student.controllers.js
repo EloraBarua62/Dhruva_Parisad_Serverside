@@ -1,3 +1,4 @@
+const Result = require("../models/Result");
 const Student = require("../models/Student");
 const { responseReturn } = require("../utils/response");
 
@@ -37,6 +38,15 @@ class studentControllers {
           subjectYear,
         });
 
+
+        const studentInfo = { id: createStudent._id , student_name, subjectYear, school};
+        let writtenPractical= [];
+        subjectYear.map((data,index) => writtenPractical.push({written: 0, practical: 0, total: 0, grade: "Null"}))
+        const studentResult = await Result.create({
+          studentInfo,
+          writtenPractical,
+        });
+        console.log(studentResult)
         responseReturn(res, 201, {
           message: "Registration successfully completed",
         });
