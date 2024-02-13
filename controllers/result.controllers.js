@@ -17,6 +17,10 @@ class resultControllers {
     }
   };
 
+  result_update = async(req, res) => {
+    console.log(req.body)
+  }
+
   // Controller: Fetch student's details
 //   details = async (req, res) => {
 //     console.log("elora");

@@ -8,6 +8,7 @@ const router = require("express").Router();
 
 // Routes
 router.get("/display", resultController.display);
+router.patch("/result-update", resultController.result_update);
 // router.get("/details", studentController.details);
 
 module.exports = router;
