@@ -7,7 +7,7 @@ class resultControllers {
     
     try {
       const resultInfo = await Result.find({});
-        console.log(resultInfo);
+        // console.log(resultInfo);
         responseReturn(res, 201, {resultInfo,
           message: "Result data loaded successfully",
         });
@@ -18,7 +18,20 @@ class resultControllers {
   };
 
   result_update = async(req, res) => {
-    console.log(req.body)
+    const id = req.params.id;
+    const writtenPractical = req.body;
+    console.log(writtenPractical)
+    try {
+      const resultUpdate = await Result.updateOne({_id: id},{$set: {writtenPractical: writtenPractical}});
+      console.log(resultUpdate);
+      const resultInfo = await Result.find({});
+      responseReturn(res, 201, {
+        resultInfo: resultInfo,
+        message: "Result data updated successfully",
+      });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
   }
 
   // Controller: Fetch student's details

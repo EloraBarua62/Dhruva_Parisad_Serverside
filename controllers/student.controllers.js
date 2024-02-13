@@ -46,7 +46,7 @@ class studentControllers {
           studentInfo,
           writtenPractical,
         });
-        console.log(studentResult)
+        // console.log(studentResult)
         responseReturn(res, 201, {
           message: "Registration successfully completed",
         });
@@ -60,7 +60,7 @@ class studentControllers {
   details = async (req, res) => {
     console.log('elora')
     const studentInfo = await Student.find({});
-    console.log(studentInfo)
+    // console.log(studentInfo)
     try {
         responseReturn(res, 201, {
           studentInfo,
