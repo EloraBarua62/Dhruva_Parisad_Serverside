@@ -8,6 +8,7 @@ const cookieParser = require("cookie-parser");
 const userRoute = require('./routers/user.route')
 const studentRoute = require('./routers/student.route')
 const resultRoute = require('./routers/result.route')
+const schoolRoute = require('./routers/school.route')
 
 
 // Create app
@@ -35,6 +36,7 @@ app.get('/', (req,res) => {
 app.use('/api/v1/user', userRoute);
 app.use('/api/v1/student', studentRoute);
 app.use('/api/v1/result', resultRoute);
+app.use('/api/v1/school', schoolRoute);
 
 
 module.exports = app;
