@@ -1,5 +1,5 @@
 const {Schema, model} = require("mongoose");
-const validator = require("validator")
+const validator = require("validator");
 
 const userSchema = new Schema(
   {
@@ -28,7 +28,7 @@ const userSchema = new Schema(
             minSymbols: 1,
           });
         },
-        message: "Please provide a strong password"
+        message: "Please provide a strong password",
       },
       required: true,
       select: false,
@@ -39,7 +39,8 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      default: "admin",
+      enum: ["student", "principal", "admin"],
+      default: "student",
     },
   },
   { timestamps: true }
