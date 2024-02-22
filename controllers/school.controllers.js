@@ -33,16 +33,16 @@ class studentControllers {
       phone_no,
     } = req.body;
     try {
-      const schoolFound = await School.findOne({ school_name, zone});
+      const schoolFound = await School.findOne({ school_name, zone });
       if (schoolFound) {
         responseReturn(res, 404, {
           error: "School already registered, try new school",
         });
       } else {
-        const total_school = await School.countDocuments({zone});
-        const zone_value = await Zone.findOne({name: zone});
-        const {code} = zone_value;
-        const school_code = code*10 + total_school + 1;
+        const total_school = await School.countDocuments({ zone });
+        const zone_value = await Zone.findOne({ name: zone });
+        const { code } = zone_value;
+        const school_code = code * 10 + total_school + 1;
         const principalInfo = { name: principal, email };
         const data = {
           school_name,
@@ -59,6 +59,39 @@ class studentControllers {
           message: "School is registered successfully",
         });
       }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
+
+  details = async (req, res) => {
+    try {
+      const schoolInfo = await School.find({});
+      console.log(schoolInfo);
+      responseReturn(res, 201, {
+        schoolInfo,
+        message: "School list loaded successfully",
+      });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
+
+  update_status = async (req, res) => {
+    try {
+      const id = req.params.id;
+      const {status} = req.body;
+      console.log(id, status);
+      const statusUpdate = await School.updateOne(
+        { _id: id },
+        { $set: { status: status } }
+      );
+      console.log(statusUpdate);
+      const schoolInfo = await School.find({});
+      responseReturn(res, 201, {
+        schoolInfo: schoolInfo,
+        message: "school data updated successfully",
+      });
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
     }
