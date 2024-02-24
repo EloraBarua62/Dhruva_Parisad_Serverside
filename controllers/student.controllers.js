@@ -1,5 +1,7 @@
 const Result = require("../models/Result");
+const School = require("../models/School");
 const Student = require("../models/Student");
+const Zone = require("../models/Zone");
 const { responseReturn } = require("../utils/response");
 
 class studentControllers {
@@ -25,6 +27,17 @@ class studentControllers {
           error: "You can not register for this exam multiple times",
         });
       } else {
+        const zone_info = await Zone.findOne({name: zone});
+        const school_info = await School.findOne({ school_name: school, zone: zone });
+        const total_student = await Student.countDocuments({
+          school,
+          zone
+        });
+        console.log(zone_info, school_info,total_student)
+        const roll =
+          (zone_info.code * 1000 + school_info.school_code) * 10000 +
+          total_student +
+          1; 
         const createStudent = await Student.create({
           student_name,
           father_name,
@@ -36,6 +49,7 @@ class studentControllers {
           school,
           imageShow,
           subjectYear,
+          roll
         });
 
 

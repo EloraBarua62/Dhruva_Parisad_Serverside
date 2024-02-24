@@ -3,8 +3,7 @@ const { responseReturn } = require("../utils/response");
 
 class resultControllers {
   // Controller: Exam result display
-  display = async (req, res) => {
-    
+  display = async (req, res) => {    
     try {
       const resultInfo = await Result.find({});
         // console.log(resultInfo);

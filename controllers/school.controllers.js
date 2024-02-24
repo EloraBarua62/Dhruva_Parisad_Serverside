@@ -2,7 +2,7 @@ const School = require("../models/School");
 const Zone = require("../models/Zone");
 const { responseReturn } = require("../utils/response");
 
-class studentControllers {
+class schoolControllers {
   // Fetch Zone
   zone_details = async (req, res) => {
     try {
@@ -66,8 +66,12 @@ class studentControllers {
 
   details = async (req, res) => {
     try {
-      const schoolInfo = await School.find({});
-      console.log(schoolInfo);
+      const zone = req.params.zone;
+      console.log(zone);
+      const schoolfound = await School.find({zone});
+      let schoolInfo = [];
+      schoolfound.map((data) => schoolInfo.push({name: data.school_name}));
+      
       responseReturn(res, 201, {
         schoolInfo,
         message: "School list loaded successfully",
@@ -98,4 +102,4 @@ class studentControllers {
   };
 }
 
-module.exports = new studentControllers();
+module.exports = new schoolControllers();
