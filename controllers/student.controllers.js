@@ -39,6 +39,7 @@ class studentControllers {
           total_student +
           1; 
         const createStudent = await Student.create({
+          roll,
           student_name,
           father_name,
           mother_name,
@@ -49,11 +50,11 @@ class studentControllers {
           school,
           imageShow,
           subjectYear,
-          roll
+          
         });
 
 
-        const studentInfo = { id: createStudent._id , student_name, subjectYear, school};
+        const studentInfo = { id: createStudent._id ,roll, student_name, subjectYear, school};
         let writtenPractical= [];
         subjectYear.map((data,index) => writtenPractical.push({written: 0, practical: 0, total: 0, grade: "Null"}))
         const studentResult = await Result.create({
@@ -72,7 +73,7 @@ class studentControllers {
   // Controller: Fetch student's details
   details = async (req, res) => {
     console.log('elora')
-    const studentInfo = await Student.find({});
+    const studentInfo = await Student.find().sort({roll: 1});
     try {
         responseReturn(res, 201, {
           studentInfo,

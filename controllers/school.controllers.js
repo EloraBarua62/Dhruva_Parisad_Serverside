@@ -68,10 +68,14 @@ class schoolControllers {
     try {
       const zone = req.params.zone;
       console.log(zone);
-      const schoolfound = await School.find({zone});
       let schoolInfo = [];
-      schoolfound.map((data) => schoolInfo.push({name: data.school_name}));
-      
+      if(zone === 'all'){
+        schoolInfo = await School.find({});
+      }
+      else{
+        const schoolfound = await School.find({ zone });
+        schoolfound.map((data) => schoolInfo.push({ name: data.school_name }));
+      }      
       responseReturn(res, 201, {
         schoolInfo,
         message: "School list loaded successfully",

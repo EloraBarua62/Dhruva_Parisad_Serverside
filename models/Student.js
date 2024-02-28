@@ -2,6 +2,11 @@ const { Schema, model } = require("mongoose");
 
 const studentSchema = new Schema(
   {
+    roll: {
+      type: Number,
+      required: true,
+      unique: true,
+    },
     student_name: {
       type: String,
       trim: true,

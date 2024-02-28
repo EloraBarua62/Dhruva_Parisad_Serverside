@@ -18,14 +18,27 @@ class resultControllers {
 
   result_update = async(req, res) => {
     const id = req.params.id;
-    const writtenPractical = req.body;
-    console.log(writtenPractical)
+    const {writtenPractical} = req.body;
+    let array = writtenPractical;
+    
+    console.log(writtenPractical);
+    
+    for (let index = 0; index < array.length; index++) {
+      let obj = array[index];
+      let value = obj.written+ obj.practical;
+      obj = {...obj, total: value};
+      array[index] = obj;
+      console.log(obj);
+      // obj.total = obj.written + obj.practical;
+    };
+    
+    // console.log(writtenPractical);
+    // writtenPractical = writtenPractical.map((each,idx) => {...each, (total: each.written+ each.practical)});
     try {
-      const resultUpdate = await Result.updateOne({_id: id},{$set: {writtenPractical: writtenPractical}});
-      console.log(resultUpdate);
-      const resultInfo = await Result.find({});
+      const resultUpdate = await Result.updateOne({_id: id},{$set: {writtenPractical: array}});
+      // console.log(resultUpdate);
+      // const resultInfo = await Result.find({});
       responseReturn(res, 201, {
-        resultInfo: resultInfo,
         message: "Result data updated successfully",
       });
     } catch (error) {
