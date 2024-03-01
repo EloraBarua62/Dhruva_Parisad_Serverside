@@ -21,14 +21,14 @@ class resultControllers {
     const {writtenPractical} = req.body;
     let array = writtenPractical;
     
-    console.log(writtenPractical);
+    // console.log(writtenPractical);
     
     for (let index = 0; index < array.length; index++) {
       let obj = array[index];
       let value = obj.written+ obj.practical;
       obj = {...obj, total: value};
       array[index] = obj;
-      console.log(obj);
+      // console.log(obj);
       // obj.total = obj.written + obj.practical;
     };
     
@@ -37,8 +37,16 @@ class resultControllers {
     try {
       const resultUpdate = await Result.updateOne({_id: id},{$set: {writtenPractical: array}});
       // console.log(resultUpdate);
-      // const resultInfo = await Result.find({});
+      const resultInfo = await Result.findOne({_id: id});
+      const result = resultInfo.writtenPractical;
+      const updatedResult = [];
+      for(let index = 0; index < result.length; index++){
+        const {written, practical, total, grade, excellence} = result[index];
+        updatedResult.push({ written, practical, total, grade, excellence });
+      }
+      console.log(updatedResult)
       responseReturn(res, 201, {
+        updatedResult,
         message: "Result data updated successfully",
       });
     } catch (error) {
