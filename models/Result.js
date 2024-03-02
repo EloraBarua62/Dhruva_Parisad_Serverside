@@ -16,6 +16,11 @@ const resultSchema = new Schema(
         type: String,
         required: true,
       },
+      roll: {
+        type: Number,
+        required: true,
+        unique: true,
+      },
       id: {
         type: ObjectId,
         ref: "Student",
@@ -40,8 +45,8 @@ const resultSchema = new Schema(
           default: 0,
         },
         grade: {
-            type: String,
-            default: "Null"
+          type: String,
+          default: "Null",
         },
         excellence: {
           type: Array,
