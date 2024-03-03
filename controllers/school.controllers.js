@@ -11,7 +11,7 @@ class schoolControllers {
       zoneFound.map((data) =>
         zone_list.push({ name: data.name, code: data.code })
       );
-      console.log(zone_list);
+      
       responseReturn(res, 201, {
         zone_list,
         message: "Zone data loaded successfully",
@@ -54,7 +54,7 @@ class schoolControllers {
           principalInfo,
         };
         const school = await School.create(data);
-        console.log(school);
+        
         responseReturn(res, 201, {
           message: "School is registered successfully",
         });
@@ -67,7 +67,7 @@ class schoolControllers {
   details = async (req, res) => {
     try {
       const zone = req.params.zone;
-      console.log(zone);
+      
       let schoolInfo = [];
       if(zone === 'all'){
         schoolInfo = await School.find({});
@@ -94,7 +94,7 @@ class schoolControllers {
         { _id: id },
         { $set: { status: status } }
       );
-      console.log(statusUpdate);
+      
       const schoolInfo = await School.find({});
       responseReturn(res, 201, {
         schoolInfo: schoolInfo,

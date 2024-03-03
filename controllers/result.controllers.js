@@ -5,7 +5,8 @@ class resultControllers {
   // Controller: Exam result display
   display = async (req, res) => {
     try {
-      const resultList = await Result.find({});
+
+      const resultList = await Result.find().sort({"studentInfo.roll" : 1});
       const resultInfo = [];
       resultList.forEach((element) => {
         let { studentInfo, writtenPractical, _id } = element;

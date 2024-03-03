@@ -33,7 +33,7 @@ class studentControllers {
           school,
           zone
         });
-        console.log(zone_info, school_info, total_student)
+        // console.log(zone_info, school_info, total_student)
         const roll =
           (zone_info.code * 1000 + school_info.school_code) * 10000 +
           total_student +
