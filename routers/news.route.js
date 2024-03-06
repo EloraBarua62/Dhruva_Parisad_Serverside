@@ -1,11 +1,11 @@
+const newsControllers = require("../controllers/news.controllers");
+
 // Import package
 const router = require("express").Router();
 
-// Import files
-const newsController = require("../controllers/news.controllers");
 
 // Routes
-router.post("/publish", newsController.publish);
-// router.get("/details", newsController.details);
+router.post("/publish", newsControllers.publish);
+router.get("/all-news", newsControllers.all_news);
 
 module.exports = router;
