@@ -1,4 +1,5 @@
 const resultController = require("../controllers/result.controllers");
+const { verifyToken } = require("../utils/verifyToken");
 
 // Import package
 const router = require("express").Router();
@@ -7,8 +8,8 @@ const router = require("express").Router();
 
 
 // Routes
-router.get("/display", resultController.display);
-router.patch("/result-update/:id", resultController.result_update);
+router.get("/display",verifyToken, resultController.display);
+router.patch("/result-update/:id",verifyToken, resultController.result_update);
 // router.get("/details", studentController.details);
 
 module.exports = router;

@@ -6,6 +6,7 @@ class schoolControllers {
   // Fetch Zone
   zone_details = async (req, res) => {
     try {
+      console.log(req)
       const zoneFound = await Zone.find({});
       const zone_list = [];
       zoneFound.map((data) =>
@@ -95,7 +96,8 @@ class schoolControllers {
         { $set: { status: status } }
       );
       
-      const schoolInfo = await School.find({});
+      const schoolInfo = await School.findOne({_id: id});
+      console.log(schoolInfo)
       responseReturn(res, 201, {
         schoolInfo: schoolInfo,
         message: "school data updated successfully",

@@ -11,6 +11,7 @@ class newsControllers {
         news_details,
         imageShow,
       });
+
       // console.log(news_title, news_details);
       responseReturn(res, 201, {
         message: "News successfully Posted",
@@ -23,7 +24,19 @@ class newsControllers {
 
   all_news = async (req, res) => {
     try {
-      const newsList = await News.find({});
+      const {count} = req.query;
+      // console.log(count);
+      let newsList;
+      if(count == 4){
+        console.log("hggjg");
+      
+        newsList = await News.find().sort({ updatedAt: -1 }).limit(4);     
+        console.log(newsList);  
+      }
+      else{
+        newsList = await News.find({});
+      }
+      
       // console.log(newsList);
       responseReturn(res, 201, {
         newsList,

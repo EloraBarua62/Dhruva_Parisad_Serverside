@@ -74,8 +74,13 @@ class studentControllers {
   // Controller: Fetch student's details
   details = async (req, res) => {
     console.log('elora')
-    const studentInfo = await Student.find().sort({roll: 1});
+    // const {page = 0, limit = 10} = req.query;
+
+    // const skip = (page-1) * parseInt(limit);
+    // const queries = 
+
     try {
+      const studentInfo = await Student.find().sort({ roll: 1 });
         responseReturn(res, 201, {
           studentInfo,
           message: "Students info loaded successfully",
