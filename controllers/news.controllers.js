@@ -22,27 +22,25 @@ class newsControllers {
     }
   };
 
+  
   all_news = async (req, res) => {
-    try {
-      const {count} = req.query;
-      // console.log(count);
-      let newsList;
-      if(count == 4){
-        console.log("hggjg");
+    try {      
+      const {count} = req.query; 
+      let newsList;     
       
-        newsList = await News.find().sort({ updatedAt: -1 }).limit(4);     
-        console.log(newsList);  
+      if(parseInt(count) === 4){
+        const keep = parseInt(count);
+        newsList = await News.find().sort({ updatedAt: -1 }).skip(1);
       }
       else{
-        newsList = await News.find({});
+       newsList = await News.find({});       
       }
-      
-      // console.log(newsList);
+
       responseReturn(res, 201, {
         newsList,
         message: "News list loaded successfully",
       });
-      // console.log(createNews)
+
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
     }

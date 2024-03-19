@@ -9,13 +9,18 @@ class schoolControllers {
       console.log(req)
       const zoneFound = await Zone.find({});
       const zone_list = [];
+      const schoolInfo = [];
       zoneFound.map((data) =>
         zone_list.push({ name: data.name, code: data.code })
       );
+
+      const schoolfound = await School.find({});
+      schoolfound.map((data) => schoolInfo.push({ name: data.school_name, zone: data.zone }));
       
       responseReturn(res, 201, {
         zone_list,
-        message: "Zone data loaded successfully",
+        schoolInfo,
+        message: "Zone and school data loaded successfully",
       });
     } catch (error) {
       responseReturn(res, 500, { error: error.message });

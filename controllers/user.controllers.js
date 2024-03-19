@@ -9,7 +9,6 @@ class userControllers {
   // user signup
   signup = async (req, res) => {
     const { name, email, password } = req.body;
-    console.log(name, email, password);
     try {
       const userFound = await User.findOne({ email });
       
@@ -18,11 +17,6 @@ class userControllers {
           error: "Email already exist, try with another email",
         });
       } 
-    //   else if (!validator.isEmail(email)) {
-    //     responseReturn(res, 404, {
-    //       error: "This email is not valid",
-    //     });
-    //   } 
       else {
         const createUser = await User.create({
           name,
@@ -56,7 +50,6 @@ class userControllers {
   // user login
   login = async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password);
 
     try {
       const user = await User.findOne({ email }).select("+password");
