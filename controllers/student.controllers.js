@@ -73,7 +73,6 @@ class studentControllers {
 
   // Controller: Fetch student's details
   details = async (req, res) => {
-    console.log('elora')
     // const {page = 0, limit = 10} = req.query;
 
     // const skip = (page-1) * parseInt(limit);
@@ -88,6 +87,22 @@ class studentControllers {
     } catch (error) {
         responseReturn(res, 500, { error: error.message });
     }
+  }
+
+  update_info = async (req, res) => {
+    const id = req.params.id;
+    const data = req.body;
+
+    try {
+      const studentFound = await Student.updateOne({ _id: id }, { $set: data });
+      responseReturn(res, 201, {
+        studentFound,
+        message: "Student info updated successfully",
+      });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+    
   }
 }
 
