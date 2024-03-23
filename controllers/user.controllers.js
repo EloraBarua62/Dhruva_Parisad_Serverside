@@ -8,7 +8,8 @@ const validator = require("validator");
 class userControllers {
   // user signup
   signup = async (req, res) => {
-    const { name, email, password } = req.body;
+    let { name, email, role, password = 0 } = req.body;
+    console.log(role, password);
     try {
       const userFound = await User.findOne({ email });
       
@@ -18,26 +19,37 @@ class userControllers {
         });
       } 
       else {
+        let pin_number = 0;
+        if (role === "principal") {
+          password = Math.floor(Math.random() * (600000 - 500000)) + 500000;
+          password = password.toString();
+          pin_number = password;
+        }
         const createUser = await User.create({
           name,
           email,
+          role,
           password: await bcrypt.hash(password, 10),
         });
         const token = await createToken({
           email: email,
           role: createUser.role,
         });
-        res.cookie("accessToken", token, {
-          expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
-        });
+
+        if (role !== "principal") {
+          res.cookie("accessToken", token, {
+            expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
+          });
+        }
 
         const userInfo = {
           name: createUser.name,
           email: createUser.email,
+          pin_number,
         };
         responseReturn(res, 201, {
           userInfo,
-          message: "User signup successfull",
+          message: "User signup successful",
         });
       }
     } catch (error) {
@@ -45,8 +57,6 @@ class userControllers {
     }
   };
 
-  
-  
   // user login
   login = async (req, res) => {
     const { email, password } = req.body;
