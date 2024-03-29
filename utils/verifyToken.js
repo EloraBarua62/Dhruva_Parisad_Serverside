@@ -13,12 +13,7 @@ module.exports.verifyToken = async (req, res, next) => {
     const data = jwt.verify(token, process.env.SECRET_KEY);
     // const data = await promisify(jwt.verify)(token, process.env.SECRET_KEY);
        
-    if (req.baseUrl === "/api/v1/result" && data.role !== "admin") {
-      responseReturn(res, 401, {
-        message: "Unauthorized access",
-      });
-    } 
-    else if (req.baseUrl === "/api/v1/school") {
+    if (req.baseUrl === "/api/v1/school") {
       const path = req.route.path;
 
       if (

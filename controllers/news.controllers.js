@@ -30,7 +30,7 @@ class newsControllers {
       
       if(parseInt(count) === 4){
         const keep = parseInt(count);
-        newsList = await News.find().sort({ updatedAt: -1 }).skip(1);
+        newsList = await News.find().sort({ updatedAt: -1 }).limit(4);
       }
       else{
        newsList = await News.find({});       

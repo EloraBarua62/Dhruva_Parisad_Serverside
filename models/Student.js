@@ -47,6 +47,10 @@ const studentSchema = new Schema(
       trim: true,
       required: true,
     },
+    school_code: {
+      type: Number,
+      required: true,
+    },
     subjectYear: {
       type: Array,
       trim: true,

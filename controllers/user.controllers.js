@@ -9,7 +9,6 @@ class userControllers {
   // user signup
   signup = async (req, res) => {
     let { name, email, role, password = 0 } = req.body;
-    console.log(role, password);
     try {
       const userFound = await User.findOne({ email });
       

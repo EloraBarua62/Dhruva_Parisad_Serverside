@@ -16,6 +16,10 @@ const resultSchema = new Schema(
         type: String,
         required: true,
       },
+      school_code: {
+        type: Number,
+        required: true,
+      },
       roll: {
         type: Number,
         required: true,

@@ -1,18 +1,19 @@
 const Result = require("../models/Result");
+const School = require("../models/School");
 const { responseReturn } = require("../utils/response");
+const jwt = require("jsonwebtoken");
 
 class resultControllers {
   // Controller: Exam result display
   display = async (req, res) => {
     try {
-
-      const resultList = await Result.find().sort({"studentInfo.roll" : 1});
+      const resultList = await Result.find().sort({ "studentInfo.roll": 1 });
       const resultInfo = [];
       resultList.forEach((element) => {
         let { studentInfo, writtenPractical, _id } = element;
         let { id, roll, ...otherInfo } = studentInfo;
         studentInfo = { ...otherInfo, roll };
-        console.log(otherInfo, roll,id)
+        
         // const {roll, student_name, school, subjectYear} = studentInfo;
 
         const updatedResult = [];
@@ -26,17 +27,6 @@ class resultControllers {
             excellence,
           });
         });
-        // for (let index = 0; index < writtenPractical.length; index++) {
-        //   const { written, practical, total, grade, excellence } =
-        //     writtenPractical[index];
-        //   updatedResult.push({
-        //     written,
-        //     practical,
-        //     total,
-        //     grade,
-        //     excellence,
-        //   });
-        // }
         writtenPractical = [...updatedResult];
         resultInfo.push({ studentInfo, writtenPractical, _id });
       });
@@ -49,24 +39,48 @@ class resultControllers {
     }
   };
 
+  specific_display = async(req, res) => {
+    const token = req?.cookies?.accessToken;
+    const data = jwt.verify(token, process.env.SECRET_KEY);
+    const email = data.email;
+    const school_code = parseInt(req.params.code);
+    
+    try {
+      const schoolFound = await School.findOne({ school_code});
+      if (!schoolFound) {
+        responseReturn(res, 400, {
+          error: "School Code is incorrect",
+        });
+      } 
+      else if(schoolFound && schoolFound?.principalInfo?.email !== email){
+        responseReturn(res, 400, {
+          error: "Your are not permitted to access the result",
+        });
+      }
+      else{
+        const resultInfo = await Result.find({"studentInfo.school_code": school_code}).sort({"studentInfo.roll": 1});
+        responseReturn(res, 201, {
+          resultInfo,
+          message: "Result data loaded successfully",
+        });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  }
+
   result_update = async (req, res) => {
     const id = req.params.id;
     const { writtenPractical } = req.body;
     let array = writtenPractical;
-
-    // console.log(writtenPractical);
 
     for (let index = 0; index < array.length; index++) {
       let obj = array[index];
       let value = obj.written + obj.practical;
       obj = { ...obj, total: value };
       array[index] = obj;
-      // console.log(obj);
-      // obj.total = obj.written + obj.practical;
     }
 
-    // console.log(writtenPractical);
-    // writtenPractical = writtenPractical.map((each,idx) => {...each, (total: each.written+ each.practical)});
     try {
       const resultUpdate = await Result.updateOne(
         { _id: id },
@@ -80,7 +94,7 @@ class resultControllers {
         const { written, practical, total, grade, excellence } = result[index];
         updatedResult.push({ written, practical, total, grade, excellence });
       }
-      console.log(updatedResult);
+      
       responseReturn(res, 201, {
         updatedResult,
         message: "Result data updated successfully",
@@ -89,21 +103,6 @@ class resultControllers {
       responseReturn(res, 500, { error: error.message });
     }
   };
-
-  // Controller: Fetch student's details
-  //   details = async (req, res) => {
-  //     console.log("elora");
-  //     const studentInfo = await Student.find({});
-  //     console.log(studentInfo);
-  //     try {
-  //       responseReturn(res, 201, {
-  //         studentInfo,
-  //         message: "Students info loaded successfully",
-  //       });
-  //     } catch (error) {
-  //       responseReturn(res, 500, { error: error.message });
-  //     }
-  //   };
 }
 
 module.exports = new resultControllers();
