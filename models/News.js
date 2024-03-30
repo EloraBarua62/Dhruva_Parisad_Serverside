@@ -12,6 +12,14 @@ const newsSchema = new Schema(
       type: String,
       required: true,
     },
+    imp_date: {
+      type: String,
+      required: true,
+    },
+    imp_msg: {
+      type: String,
+      required: true,
+    },
     imageShow: {
       type: String,
       trim: true,

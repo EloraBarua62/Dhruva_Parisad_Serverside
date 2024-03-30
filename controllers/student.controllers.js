@@ -96,7 +96,7 @@ class studentControllers {
               roll,
               student_name,
               subjectYear,
-              school,
+              email,
               school_code: school_info.school_code,
             };
             let writtenPractical = [];
@@ -113,6 +113,7 @@ class studentControllers {
               writtenPractical,
             });
             responseReturn(res, 201, {
+              studentDetails: createStudent,
               message: "Registration successfully completed",
             });
           }

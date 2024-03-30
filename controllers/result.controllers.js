@@ -13,7 +13,7 @@ class resultControllers {
         let { studentInfo, writtenPractical, _id } = element;
         let { id, roll, ...otherInfo } = studentInfo;
         studentInfo = { ...otherInfo, roll };
-        
+
         // const {roll, student_name, school, subjectYear} = studentInfo;
 
         const updatedResult = [];
@@ -39,26 +39,26 @@ class resultControllers {
     }
   };
 
-  specific_display = async(req, res) => {
+  school_result_display = async (req, res) => {
     const token = req?.cookies?.accessToken;
     const data = jwt.verify(token, process.env.SECRET_KEY);
     const email = data.email;
     const school_code = parseInt(req.params.code);
-    
+
     try {
-      const schoolFound = await School.findOne({ school_code});
+      const schoolFound = await School.findOne({ school_code });
       if (!schoolFound) {
         responseReturn(res, 400, {
           error: "School Code is incorrect",
         });
-      } 
-      else if(schoolFound && schoolFound?.principalInfo?.email !== email){
+      } else if (schoolFound && schoolFound?.principalInfo?.email !== email) {
         responseReturn(res, 400, {
           error: "Your are not permitted to access the result",
         });
-      }
-      else{
-        const resultInfo = await Result.find({"studentInfo.school_code": school_code}).sort({"studentInfo.roll": 1});
+      } else {
+        const resultInfo = await Result.find({
+          "studentInfo.school_code": school_code,
+        }).sort({ "studentInfo.roll": 1 });
         responseReturn(res, 201, {
           resultInfo,
           message: "Result data loaded successfully",
@@ -67,7 +67,35 @@ class resultControllers {
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
     }
-  }
+  };
+
+  student_result_display = async (req, res) => {
+    const token = req?.cookies?.accessToken;
+    const data = jwt.verify(token, process.env.SECRET_KEY);
+    const email = data.email;
+    const roll = parseInt(req.params.roll);
+
+    try {
+      const studentResultInfo = await Result.findOne({
+        "studentInfo.email": email,
+        "studentInfo.roll": roll,
+      });
+
+      console.log(studentResultInfo)
+      if (studentResultInfo) {
+        responseReturn(res, 201, {
+          studentResultInfo,
+          message: "Result data loaded successfully",
+        });
+      } else {
+        responseReturn(res, 400, {
+          error: "Your student roll is incorrect, Try again",
+        });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
 
   result_update = async (req, res) => {
     const id = req.params.id;
@@ -94,7 +122,7 @@ class resultControllers {
         const { written, practical, total, grade, excellence } = result[index];
         updatedResult.push({ written, practical, total, grade, excellence });
       }
-      
+
       responseReturn(res, 201, {
         updatedResult,
         message: "Result data updated successfully",

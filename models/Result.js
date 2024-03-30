@@ -12,7 +12,7 @@ const resultSchema = new Schema(
         type: Array,
         required: true,
       },
-      school: {
+      email: {
         type: String,
         required: true,
       },

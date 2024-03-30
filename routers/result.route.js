@@ -10,9 +10,14 @@ const router = require("express").Router();
 // Routes
 router.get("/display",verifyToken, resultController.display);
 router.get(
-  "/specific-display/:code",
+  "/school-display/:code",
   verifyToken,
-  resultController.specific_display
+  resultController.school_result_display
+);
+router.get(
+  "/student-display/:roll",
+  verifyToken,
+  resultController.student_result_display
 );
 router.patch("/result-update/:id",verifyToken, resultController.result_update);
 // router.get("/details", studentController.details);
