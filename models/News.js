@@ -25,6 +25,10 @@ const newsSchema = new Schema(
       trim: true,
       required: true,
     },
+    exam_date: {
+      type: String,
+      default: "",
+    }
   },
   { timestamps: true }
 );

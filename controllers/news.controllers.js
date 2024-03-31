@@ -12,13 +12,14 @@ class newsControllers {
       if (err) {
         responseReturn(res, 404, { error: "someting error" });
       } else {
-        let { news_title, news_details, imp_date, imp_msg } = fields;
+        let { news_title, news_details, imp_date, imp_msg, exam_date } = fields;
         let { imageShow } = files;
 
         news_title = news_title[0];
         news_details = news_details[0];
         imp_date = imp_date[0];
         imp_msg = imp_msg[0];
+        exam_date = exam_date[0];
         imageShow = imageShow[0];
 
         cloudinary.config({
@@ -38,6 +39,7 @@ class newsControllers {
             news_details,
             imp_date,
             imp_msg,
+            exam_date,
             imageShow: result.url,
           });
           responseReturn(res, 201, {

@@ -4,6 +4,7 @@ const Student = require("../models/Student");
 const Zone = require("../models/Zone");
 const formidable = require("formidable");
 const { responseReturn } = require("../utils/response");
+const News = require("../models/News");
 const cloudinary = require("cloudinary").v2;
 
 class studentControllers {
@@ -112,8 +113,11 @@ class studentControllers {
               studentInfo,
               writtenPractical,
             });
+
+            const date = await News.findOne({}, {exam_date: 1, array: { $slice: -1 }});
             responseReturn(res, 201, {
-              studentDetails: createStudent,
+              exam_date: date,
+              studentDetail: createStudent,
               message: "Registration successfully completed",
             });
           }
