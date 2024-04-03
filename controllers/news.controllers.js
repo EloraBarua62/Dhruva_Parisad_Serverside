@@ -55,10 +55,8 @@ class newsControllers {
   all_news = async (req, res) => {
     try {
       const count = parseInt(req.query.count);
-      console.log(count)
       const newsList = await News.find().sort({ updatedAt: -1 }).limit(count);
 
-      console.log(newsList)
       responseReturn(res, 201, {
         newsList,
         message: "News list loaded successfully",

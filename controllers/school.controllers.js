@@ -6,7 +6,6 @@ class schoolControllers {
   // Fetch Zone
   zone_details = async (req, res) => {
     try {
-     
       const zoneFound = await Zone.find({});
       const zone_list = [];
       const schoolInfo = [];
@@ -14,9 +13,11 @@ class schoolControllers {
         zone_list.push({ name: data.name, code: data.code })
       );
 
-      const schoolfound = await School.find({});
-      schoolfound.map((data) => schoolInfo.push({ name: data.school_name, zone: data.zone }));
-      
+      const schoolfound = await School.find({ status: "confirmed" });
+      schoolfound.map((data) =>
+        schoolInfo.push({ name: data.school_name, zone: data.zone })
+      );
+
       responseReturn(res, 201, {
         zone_list,
         schoolInfo,
@@ -60,10 +61,17 @@ class schoolControllers {
           principalInfo,
         };
         const school = await School.create(data);
-        
-        responseReturn(res, 201, {
-          message: "School is registered successfully",
-        });
+        console.log(school);
+        if (school) {
+          responseReturn(res, 201, {
+            message: "School is registered successfully",
+          });
+        }
+        else{
+          responseReturn(res, 400, {
+            error: error.message,
+          });
+        }
       }
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
@@ -73,15 +81,14 @@ class schoolControllers {
   details = async (req, res) => {
     try {
       const zone = req.params.zone;
-      
+
       let schoolInfo = [];
-      if(zone === 'all'){
+      if (zone === "all") {
         schoolInfo = await School.find({});
-      }
-      else{
+      } else {
         const schoolfound = await School.find({ zone });
         schoolfound.map((data) => schoolInfo.push({ name: data.school_name }));
-      }      
+      }
       responseReturn(res, 201, {
         schoolInfo,
         message: "School list loaded successfully",
@@ -94,15 +101,15 @@ class schoolControllers {
   update_status = async (req, res) => {
     try {
       const id = req.params.id;
-      const {status} = req.body;
-      
+      const { status } = req.body;
+
       const statusUpdate = await School.updateOne(
         { _id: id },
         { $set: { status: status } }
       );
-      
-      const schoolInfo = await School.findOne({_id: id});
-      
+
+      const schoolInfo = await School.findOne({ _id: id });
+
       responseReturn(res, 201, {
         schoolInfo: schoolInfo,
         message: "school data updated successfully",
