@@ -6,8 +6,16 @@ const jwt = require("jsonwebtoken");
 class resultControllers {
   // Controller: Exam result display
   display = async (req, res) => {
+    const { page, parPage } = req.query;
+    const skipPage = parseInt(parPage) * (parseInt(page) - 1);
     try {
-      const resultList = await Result.find().sort({ "studentInfo.roll": 1 });
+      const resultList = await Result
+      .find()
+      .skip(skipPage)
+      .limit(parPage)
+      .sort({ "studentInfo.roll": 1 });
+      
+      
       const resultInfo = [];
       resultList.forEach((element) => {
         let { studentInfo, writtenPractical, _id } = element;
@@ -30,8 +38,11 @@ class resultControllers {
         writtenPractical = [...updatedResult];
         resultInfo.push({ studentInfo, writtenPractical, _id });
       });
+      const totalData = await Result.countDocuments();
+      console.log(totalData)
       responseReturn(res, 201, {
         resultInfo,
+        totalData,
         message: "Result data loaded successfully",
       });
     } catch (error) {
@@ -39,6 +50,8 @@ class resultControllers {
     }
   };
 
+  
+  
   school_result_display = async (req, res) => {
     const token = req?.cookies?.accessToken;
     const data = jwt.verify(token, process.env.SECRET_KEY);
