@@ -107,7 +107,7 @@ class userControllers {
       // const message = `We have received a password reset request. Please use the below link to reset your password. This link will be valid for 10 minutes`;
       const message = `We have received a password reset request. Please use the below link to reset your password\n\n${resetUrl} \n\n This link will be valid for 10 minutes`;
 
-      console.log(resetUrl)
+      
       try {
         await sendEmail({
           email: userFound.email,
@@ -121,6 +121,7 @@ class userControllers {
         userFound.passwordResetToken = undefined;
         userFound.passwordResetTokenExpires = undefined;
         userFound.save({validateBeforeSave: false});
+        console.log(resetUrl);
         responseReturn(res, 500, { error: error.message });
       }
     } 
