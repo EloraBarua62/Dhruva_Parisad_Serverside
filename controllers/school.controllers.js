@@ -66,8 +66,7 @@ class schoolControllers {
           responseReturn(res, 201, {
             message: "School is registered successfully",
           });
-        }
-        else{
+        } else {
           responseReturn(res, 400, {
             error: error.message,
           });
@@ -78,6 +77,28 @@ class schoolControllers {
     }
   };
 
+  // School Information display
+  display = async (req, res) => {
+    const { page, parPage } = req.query;
+    const skipPage = parseInt(parPage) * (parseInt(page) - 1);
+    try {
+      const schoolList = await School.find()
+        .skip(skipPage)
+        .limit(parPage)
+        .sort({ school_code: 1 });
+
+      const totalData = await School.countDocuments();
+      responseReturn(res, 201, {
+        schoolList,
+        totalData,
+        message: "School data loaded successfully",
+      });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
+
+  
   details = async (req, res) => {
     try {
       const zone = req.params.zone;

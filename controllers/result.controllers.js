@@ -39,7 +39,6 @@ class resultControllers {
         resultInfo.push({ studentInfo, writtenPractical, _id });
       });
       const totalData = await Result.countDocuments();
-      console.log(totalData)
       responseReturn(res, 201, {
         resultInfo,
         totalData,

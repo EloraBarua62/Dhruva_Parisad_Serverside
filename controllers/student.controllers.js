@@ -10,14 +10,11 @@ const cloudinary = require("cloudinary").v2;
 class studentControllers {
   // Controller: Exam registration
   registration = async (req, res) => {
-
     const form = new formidable.IncomingForm();
-    
     form.parse(req, async (err, fields, files) => {
       if (err) {
         responseReturn(res, 404, { error: "someting error" });
-      } 
-      else {
+      } else {
         let {
           student_name,
           father_name,
@@ -30,7 +27,7 @@ class studentControllers {
           subjectYear,
         } = fields;
 
-        let {imageShow} = files;
+        let { imageShow } = files;
 
         student_name = student_name[0];
         father_name = father_name[0];
@@ -40,10 +37,10 @@ class studentControllers {
         email = email[0];
         zone = zone[0];
         school = school[0];
-        subjectYear = JSON.parse(subjectYear)
+        subjectYear = JSON.parse(subjectYear);
         imageShow = imageShow[0];
 
-        console.log(subjectYear)
+        console.log(subjectYear);
         cloudinary.config({
           cloud_name: process.env.cloud_name,
           api_key: process.env.api_key,
@@ -57,11 +54,14 @@ class studentControllers {
               error: "You can not register for this exam multiple times",
             });
           } else {
-            const result = await cloudinary.uploader.upload(imageShow.filepath , {
-              folder: "dhruva_parishad"
-            });
+            const result = await cloudinary.uploader.upload(
+              imageShow.filepath,
+              {
+                folder: "dhruva_parishad",
+              }
+            );
 
-            console.log(result)
+            console.log(result);
             const zone_info = await Zone.findOne({ name: zone });
             const school_info = await School.findOne({
               school_name: school,
@@ -114,7 +114,10 @@ class studentControllers {
               writtenPractical,
             });
 
-            const date = await News.findOne({}, {exam_date: 1, array: { $slice: -1 }});
+            const date = await News.findOne(
+              {},
+              { exam_date: 1, array: { $slice: -1 } }
+            );
             responseReturn(res, 201, {
               exam_date: date,
               studentDetail: createStudent,
@@ -125,20 +128,25 @@ class studentControllers {
           responseReturn(res, 500, { error: error.message });
         }
       }
-    });  
+    });
   };
 
   // Controller: Fetch student's details
   details = async (req, res) => {
-    // const {page = 0, limit = 10} = req.query;
-
-    // const skip = (page-1) * parseInt(limit);
-    // const queries =
+    const { page, parPage } = req.query;
+    const skipPage = parseInt(parPage) * (parseInt(page) - 1);
 
     try {
-      const studentInfo = await Student.find().sort({ roll: 1 });
+      const studentInfo = await Student.find()
+        .skip(skipPage)
+        .limit(parPage)
+        .sort({ roll: 1 });
+
+      const totalData = await Student.countDocuments();
+
       responseReturn(res, 201, {
         studentInfo,
+        totalData,
         message: "Students info loaded successfully",
       });
     } catch (error) {
@@ -146,6 +154,7 @@ class studentControllers {
     }
   };
 
+  // Controller: Update info
   update_info = async (req, res) => {
     const id = req.params.id;
     const data = req.body;
@@ -161,7 +170,30 @@ class studentControllers {
     }
   };
 
+  
+  // Controller: Delete Info
+  delete_info = async (req, res) => {
+    const id = req.params.id;
+    try {
+      const deleteStudentInfo = await Student.deleteOne({ _id: id });
+      const deleteStudentResult = await Result.deleteOne({
+        "studentInfo.id": id
+      });
+      
+      if (
+        deleteStudentInfo.deletedCount == 1 &&
+        deleteStudentResult.deletedCount == 1
+      ) {
+        responseReturn(res, 201, {
+          message: "Student info deleted successfully",
+        });
+      } else {
+        responseReturn(res, 500, { error: error.message });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
 }
-
 
 module.exports = new studentControllers();
