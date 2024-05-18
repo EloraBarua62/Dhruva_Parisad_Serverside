@@ -5,7 +5,9 @@ const Zone = require("../models/Zone");
 const formidable = require("formidable");
 const { responseReturn } = require("../utils/response");
 const News = require("../models/News");
+const ExamResultDate = require("../models/ExamResultDate");
 const cloudinary = require("cloudinary").v2;
+// const mongoose = require("mongoose");
 
 class studentControllers {
   // Controller: Exam registration
@@ -40,7 +42,6 @@ class studentControllers {
         subjectYear = JSON.parse(subjectYear);
         imageShow = imageShow[0];
 
-        console.log(subjectYear);
         cloudinary.config({
           cloud_name: process.env.cloud_name,
           api_key: process.env.api_key,
@@ -114,12 +115,13 @@ class studentControllers {
               writtenPractical,
             });
 
-            const date = await News.findOne(
-              {},
-              { exam_date: 1, array: { $slice: -1 } }
-            );
+            const id = "6648e283a0044fe1bbc2fef1"
+              
+            const dateInfo = await ExamResultDate.findOne({
+              _id: id,
+            });
             responseReturn(res, 201, {
-              exam_date: date,
+              exam_date: dateInfo.exam_date,
               studentDetail: createStudent,
               message: "Registration successfully completed",
             });

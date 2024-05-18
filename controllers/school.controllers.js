@@ -98,7 +98,6 @@ class schoolControllers {
     }
   };
 
-  
   details = async (req, res) => {
     try {
       const zone = req.params.zone;
@@ -135,6 +134,24 @@ class schoolControllers {
         schoolInfo: schoolInfo,
         message: "school data updated successfully",
       });
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
+
+  delete_info = async (req, res) => {
+    try {
+      const id = req.params.id;
+      const schoolDelete = await School.deleteOne({ _id: id });
+
+      if (schoolDelete.deletedCount === 1) {
+        responseReturn(res, 201, {
+          message: "school data deleted successfully",
+        });
+      }
+      else{
+        responseReturn(res, 400, { error: error.message });
+      }
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
     }
