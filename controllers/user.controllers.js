@@ -19,18 +19,27 @@ class userControllers {
           error: "Email already exist, try with another email",
         });
       } else {
+        let createUser;
         let pin_number = 0;
         if (role === "principal") {
           password = Math.floor(Math.random() * (600000 - 500000)) + 500000;
           password = password.toString();
           pin_number = password;
+          createUser = await User.create({
+            name,
+            email,
+            role,
+            password,
+          });
+        } else {
+          createUser = await User.create({
+            name,
+            email,
+            role,
+            password: await bcrypt.hash(password, 10),
+          });
         }
-        const createUser = await User.create({
-          name,
-          email,
-          role,
-          password: await bcrypt.hash(password, 10),
-        });
+
         const token = await createToken({
           email: email,
           role: createUser.role,
@@ -45,7 +54,6 @@ class userControllers {
         const userInfo = {
           name: createUser.name,
           email: createUser.email,
-          pin_number,
         };
         responseReturn(res, 201, {
           userInfo,
@@ -66,10 +74,17 @@ class userControllers {
 
       // User finding condition
       if (user) {
-        const match = await bcrypt.compare(password, user.password);
+        let pin, match;
+        if(user.role === 'principal'){
+          pin = user.password;
+        }
+        else{
+          match = await bcrypt.compare(password, user.password);
+        }
+        
 
         // Password matching condition
-        if (match) {
+        if (match || (pin.length > 0)) {
           const token = await createToken({
             email: user.email,
             role: user.role,
@@ -99,7 +114,7 @@ class userControllers {
     const userFound = await User.findOne({ email });
 
     if (userFound) {
-      const resetToken = userFound.createResetPasswordToken();      
+      const resetToken = userFound.createResetPasswordToken();
       await userFound.save({ validateBeforeSave: false });
       const resetUrl = `${req.protocol}://${req.get(
         "host"
@@ -107,25 +122,24 @@ class userControllers {
       // const message = `We have received a password reset request. Please use the below link to reset your password. This link will be valid for 10 minutes`;
       const message = `We have received a password reset request. Please use the below link to reset your password\n\n${resetUrl} \n\n This link will be valid for 10 minutes`;
 
-      
       try {
         await sendEmail({
           email: userFound.email,
           subject: "Password change request received",
           message: message,
-          resetUrl
+          resetUrl,
         });
-        responseReturn(res, 200, { message: "Password reset link send to the user email" });
-      } 
-      catch (error) {
+        responseReturn(res, 200, {
+          message: "Password reset link send to the user email",
+        });
+      } catch (error) {
         userFound.passwordResetToken = undefined;
         userFound.passwordResetTokenExpires = undefined;
-        userFound.save({validateBeforeSave: false});
+        userFound.save({ validateBeforeSave: false });
         console.log(resetUrl);
         responseReturn(res, 500, { error: error.message });
       }
-    } 
-    else {
+    } else {
       responseReturn(res, 404, {
         error: "You are not a registered user, Please create an account",
       });
@@ -134,10 +148,16 @@ class userControllers {
 
   // Forgot Password
   reset_password = async (req, res) => {
-    const token = crypto.createHash('sha256').update(req.params.token).digest('hex');
-    const user = await User.findOne({passwordResetToken: token, passwordResetTokenExpires: {$gt: Date.now()}})
+    const token = crypto
+      .createHash("sha256")
+      .update(req.params.token)
+      .digest("hex");
+    const user = await User.findOne({
+      passwordResetToken: token,
+      passwordResetTokenExpires: { $gt: Date.now() },
+    });
 
-    if(user){
+    if (user) {
       const pass = await bcrypt.hash(req.body.password, 10);
       user.password = pass;
       user.passwordResetToken = undefined;
@@ -158,9 +178,11 @@ class userControllers {
         name: user.name,
         email: user.email,
       };
-     responseReturn(res, 200, {userInfo, message: "New password has been set successfully"});
-    }
-    else{
+      responseReturn(res, 200, {
+        userInfo,
+        message: "New password has been set successfully",
+      });
+    } else {
       responseReturn(res, 404, {
         error: "Token is ivalid or has expired",
       });

@@ -1,4 +1,5 @@
 const School = require("../models/School");
+const User = require("../models/User");
 const Zone = require("../models/Zone");
 const { responseReturn } = require("../utils/response");
 
@@ -50,7 +51,8 @@ class schoolControllers {
         const zone_value = await Zone.findOne({ name: zone });
         const { code } = zone_value;
         const school_code = code * 10 + total_school + 1;
-        const principalInfo = { name: principal, email };
+        const userInfo = await User.findOne({email});
+        const principalInfo = { name: principal, email , pin_number: userInfo.password};
         const data = {
           school_name,
           zone,
@@ -61,7 +63,6 @@ class schoolControllers {
           principalInfo,
         };
         const school = await School.create(data);
-        console.log(school);
         if (school) {
           responseReturn(res, 201, {
             message: "School is registered successfully",
