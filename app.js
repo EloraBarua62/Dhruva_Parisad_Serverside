@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: ["https://dhruva-parisad-clientside.vercel.app"],
+    origin: ["https://dhruva-parisad-clientside.vercel.app/"],
     // origin: ["http://localhost:3000"],
     credentials: true,
   })
