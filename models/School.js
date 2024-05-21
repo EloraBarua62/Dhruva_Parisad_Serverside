@@ -37,10 +37,6 @@ const schoolSchema = new Schema(
         lowercase: true,
         validate: [validator.isEmail, "Please provide a valid email"],
         required: true,
-      },
-      pin_number: {
-        type: String,
-        required: true,
       }
     },
     status: {

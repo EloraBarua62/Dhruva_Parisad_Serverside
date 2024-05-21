@@ -33,7 +33,11 @@ module.exports.verifyToken = async (req, res, next) => {
         });
       }
     } 
-    else if(req.originalUrl === "/api/v1/student/details" && data.role !== "admin") {
+    else if (
+      (req.originalUrl === "/api/v1/student/details" ||
+        req.originalUrl === "/api/v1/user/principal-info") &&
+      data.role !== "admin"
+    ) {
       responseReturn(res, 401, {
         message: "Unauthorized access",
       });

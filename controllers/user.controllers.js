@@ -3,51 +3,57 @@ const { createToken } = require("../utils/createToken");
 const { responseReturn } = require("../utils/response");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-const validator = require("validator");
-const sendEmail = require("../utils/email");
+const { sendEmail } = require("../utils/email");
+
 
 // userControllers class is defined and called
 class userControllers {
   // user signup
   signup = async (req, res) => {
     let { name, email, role, password = 0 } = req.body;
+    console.log(email)
     try {
       const userFound = await User.findOne({ email });
-
       if (userFound) {
         responseReturn(res, 404, {
           error: "Email already exist, try with another email",
         });
-      } else {
-        let createUser;
-        let pin_number = 0;
+      } 
+      else {
+        // Generate pin number for role: principal
+        let pin_number = '';
         if (role === "principal") {
           password = Math.floor(Math.random() * (600000 - 500000)) + 500000;
           password = password.toString();
           pin_number = password;
-          createUser = await User.create({
-            name,
-            email,
-            role,
-            password,
-          });
-        } else {
-          createUser = await User.create({
+        }
+
+        // Add new user
+         const createUser = await User.create({
             name,
             email,
             role,
             password: await bcrypt.hash(password, 10),
           });
-        }
-
-        const token = await createToken({
-          email: email,
-          role: createUser.role,
-        });
-
+       
+          // if role: student, admin => send cookie
+          // if role: principal  => send mail
         if (role !== "principal") {
+          const token = await createToken({
+            email: email,
+            role: createUser.role,
+          });
           res.cookie("accessToken", token, {
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
+          });
+        }
+        else{
+          const message = `Your PIN number is ${pin_number}. Login in our website with this number. Thank you.`;
+          await sendEmail({
+            email,
+            name,
+            subject: "Welcome to Dhruva Parishad",
+            message,
           });
         }
 
@@ -68,23 +74,14 @@ class userControllers {
   // user login
   login = async (req, res) => {
     const { email, password } = req.body;
-
     try {
       const user = await User.findOne({ email }).select("+password");
-
       // User finding condition
       if (user) {
-        let pin, match;
-        if(user.role === 'principal'){
-          pin = user.password;
-        }
-        else{
-          match = await bcrypt.compare(password, user.password);
-        }
-        
+        const match = await bcrypt.compare(password, user.password);
 
         // Password matching condition
-        if (match || (pin.length > 0)) {
+        if (match) {
           const token = await createToken({
             email: user.email,
             role: user.role,
@@ -123,12 +120,12 @@ class userControllers {
       const message = `We have received a password reset request. Please use the below link to reset your password\n\n${resetUrl} \n\n This link will be valid for 10 minutes`;
 
       try {
-        await sendEmail({
-          email: userFound.email,
-          subject: "Password change request received",
-          message: message,
-          resetUrl,
-        });
+        // await sendEmail({
+        //   email: userFound.email,
+        //   subject: "Password change request received",
+        //   message: message,
+        //   resetUrl,
+        // });
         responseReturn(res, 200, {
           message: "Password reset link send to the user email",
         });
@@ -186,6 +183,31 @@ class userControllers {
       responseReturn(res, 404, {
         error: "Token is ivalid or has expired",
       });
+    }
+  };
+
+  // Principal information fetch
+  principal_info = async (req, res) => {
+    const { page, parPage } = req.query;
+    const skipPage = parseInt(parPage) * (parseInt(page) - 1);
+    try {
+      const principal_info = await User.find({ role: "principal" })
+        .skip(skipPage)
+        .limit(parPage);
+
+      const totalData = principal_info.length;
+      console.log(principal_info, totalData);
+      if (totalData > 0) {
+        responseReturn(res, 200, {
+          principal_info,
+          totalData,
+          message: "Principal info loaded successfully",
+        });
+      } else {
+        responseReturn(res, 404, { error: "Principal info list is empty" });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
     }
   };
 }

@@ -51,8 +51,7 @@ class schoolControllers {
         const zone_value = await Zone.findOne({ name: zone });
         const { code } = zone_value;
         const school_code = code * 10 + total_school + 1;
-        const userInfo = await User.findOne({email});
-        const principalInfo = { name: principal, email , pin_number: userInfo.password};
+        const principalInfo = { name: principal, email};
         const data = {
           school_name,
           zone,
