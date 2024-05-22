@@ -61,6 +61,11 @@ const studentSchema = new Schema(
       trim: true,
       required: true,
     },
+    payment: {
+      type: String,
+      enum: ["Paid", "Unpaid"],
+      default: "Unpaid",
+    },
   },
   { timestamps: true }
 );
