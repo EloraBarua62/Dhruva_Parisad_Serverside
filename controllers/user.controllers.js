@@ -44,6 +44,8 @@ class userControllers {
             role: createUser.role,
           });
           res.cookie("accessToken", token, {
+            httpOnly: false,
+            SameSite: None,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
         }
@@ -60,6 +62,7 @@ class userControllers {
         const userInfo = {
           name: createUser.name,
           email: createUser.email,
+          role: createUser.role
         };
         responseReturn(res, 201, {
           userInfo,
@@ -92,6 +95,7 @@ class userControllers {
           const userInfo = {
             name: user.name,
             email: user.email,
+            role: user.role,
           };
           responseReturn(res, 200, { userInfo, message: "Login successful" });
         } else {
