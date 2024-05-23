@@ -90,6 +90,8 @@ class userControllers {
             role: user.role,
           });
           res.cookie("accessToken", token, {
+            httpOnly: false,
+            SameSite: None,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
           const userInfo = {
