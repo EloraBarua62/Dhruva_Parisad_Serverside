@@ -74,6 +74,8 @@ class userControllers {
     }
   };
 
+  
+  
   // user login
   login = async (req, res) => {
     const { email, password } = req.body;
@@ -91,7 +93,8 @@ class userControllers {
           });
           res.cookie("accessToken", token, {
             httpOnly: false,
-            SameSite: None,
+            sameSite: 'none',
+            secure: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
           const userInfo = {
@@ -111,6 +114,8 @@ class userControllers {
     }
   };
 
+ 
+ 
   // Forgot Password
   forgot_password = async (req, res) => {
     const { email } = req.body;
