@@ -115,7 +115,7 @@ class studentControllers {
               writtenPractical,
             });
 
-            const id = "6648e283a0044fe1bbc2fef1"
+            const id = process.env.exam_result_date;
               
             const dateInfo = await ExamResultDate.findOne({
               _id: id,

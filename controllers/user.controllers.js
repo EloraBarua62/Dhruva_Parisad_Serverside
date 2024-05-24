@@ -38,7 +38,7 @@ class userControllers {
        
           // if role: student, admin => send cookie
           // if role: principal  => send mail
-        if (role !== "principal") {
+        
           const token = await createToken({
             email: email,
             role: createUser.role,
@@ -49,8 +49,8 @@ class userControllers {
             secure: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
-        }
-        else{
+        
+        if(role === "principal") {
           const message = `Your PIN number is ${pin_number}. Login in our website with this number. Thank you.`;
           await sendEmail({
             email,
@@ -67,7 +67,7 @@ class userControllers {
         };
         responseReturn(res, 201, {
           userInfo,
-          message: "User signup successful",
+          message: "Your account is created successfully",
         });
       }
     } catch (error) {

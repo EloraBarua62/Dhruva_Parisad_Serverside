@@ -3,13 +3,15 @@ const { Schema, model } = require("mongoose");
 const examResultDateSchema = new Schema(
   {
     exam_date: {
-      type: String,
-      default: "",
+      type: Date,
+      trim: true,
+      required: true,
     },
     result_date: {
-      type: String,
-      default: "",
-    }
+      type: Date,
+      trim: true,
+      required: true,
+    },
   },
   { timestamps: true }
 );
