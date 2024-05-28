@@ -107,7 +107,8 @@ class studentControllers {
                 written: 0,
                 practical: 0,
                 total: 0,
-                grade: "Null",
+                letter_grade: "Null",
+                grade_point: 0,
               })
             );
             const studentResult = await Result.create({

@@ -48,14 +48,14 @@ const resultSchema = new Schema(
           required: true,
           default: 0,
         },
-        grade: {
+        letter_grade: {
           type: String,
           default: "Null",
         },
-        excellence: {
-          type: Array,
-          default: [],
-        },
+        grade_point: {
+          type: Number,
+          default: 0,
+        }
       },
     ],
   },

@@ -44,8 +44,8 @@ class userControllers {
             role: createUser.role,
           });
           res.cookie("accessToken", token, {
-            httpOnly: false,
-            sameSite: "none",
+            // httpOnly: false,
+            // sameSite: "none",
             secure: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
@@ -93,8 +93,8 @@ class userControllers {
             role: user.role,
           });
           res.cookie("accessToken", token, {
-            httpOnly: false,
-            sameSite: 'none',
+            // httpOnly: false,
+            // sameSite: 'none',
             secure: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
