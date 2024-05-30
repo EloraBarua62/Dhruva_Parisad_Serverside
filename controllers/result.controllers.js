@@ -10,24 +10,24 @@ class resultControllers {
     const { page, parPage } = req.query;
     const skipPage = parseInt(parPage) * (parseInt(page) - 1);
     try {
-      const resultList = await Result
-      .find()
-      .skip(skipPage)
-      .limit(parPage)
-      .sort({ "studentInfo.roll": 1 });
-      
-      
+      const resultList = await Result.find()
+        .skip(skipPage)
+        .limit(parPage)
+        .sort({ "studentInfo.roll": 1 });
+
       const resultInfo = [];
+
+      // Extracting all data
       resultList.forEach((element) => {
-        let { studentInfo, writtenPractical, _id } = element;
+        let { studentInfo, writtenPractical, _id, averageLetterGrade, averageGradePoint } = element;
         let { id, roll, ...otherInfo } = studentInfo;
         studentInfo = { ...otherInfo, roll };
 
-        // const {roll, student_name, school, subjectYear} = studentInfo;
-
+        // Updating written praitcal number
         const updatedResult = [];
         writtenPractical.forEach((marks) => {
-          const { written, practical, total, letter_grade, grade_point } = marks;
+          const { written, practical, total, letter_grade, grade_point } =
+            marks;
           updatedResult.push({
             written,
             practical,
@@ -37,8 +37,16 @@ class resultControllers {
           });
         });
         writtenPractical = [...updatedResult];
-        resultInfo.push({ studentInfo, writtenPractical, _id });
+        resultInfo.push({
+          studentInfo,
+          writtenPractical,
+          _id,
+          averageLetterGrade,
+          averageGradePoint,
+        });
       });
+
+      // Count total number of result/student
       const totalData = await Result.countDocuments();
       responseReturn(res, 201, {
         resultInfo,
@@ -50,8 +58,6 @@ class resultControllers {
     }
   };
 
-  
-  
   school_result_display = async (req, res) => {
     const token = req?.cookies?.accessToken;
     const data = jwt.verify(token, process.env.SECRET_KEY);
@@ -93,13 +99,17 @@ class resultControllers {
         "studentInfo.email": email,
         "studentInfo.roll": roll,
       });
-      const personalInfo = await Student.findOne({
-        email: email, roll: roll,
-      });
 
-      const studentPersonalInfo = { father_name: personalInfo?.father_name , mother_name: personalInfo?.mother_name }; 
-      console.log(studentResultInfo)
-      console.log(studentPersonalInfo);
+      // Extracting personal details
+      const personalInfo = await Student.findOne({
+        email: email,
+        roll: roll,
+      });
+      const studentPersonalInfo = {
+        father_name: personalInfo?.father_name,
+        mother_name: personalInfo?.mother_name,
+      };
+      
       if (studentResultInfo) {
         responseReturn(res, 201, {
           studentResultInfo,
@@ -119,8 +129,9 @@ class resultControllers {
   result_update = async (req, res) => {
     const id = req.params.id;
     const { writtenPractical } = req.body;
-    let array = writtenPractical;
+    let keep_written_practical_array = writtenPractical;
 
+    // Marking system
     const total_exam_marks = [
       ["Rhyme", "Primary", 250],
       ["Patriotic Song", "Primary", 250],
@@ -195,70 +206,118 @@ class resultControllers {
       ["Fine Arts", "Sixth", 600],
       ["Fine Arts", "Seventh", 600],
       ["Fine Arts", "Eighth", 750],
-      ["Fine Arts", "Ninth", 900]
-    ];   
+      ["Fine Arts", "Ninth", 900],
+    ];
 
     try {
-      const resultInfo = await Result.findOne({ _id: id }); 
-      const sub_year = [...resultInfo.studentInfo.subjectYear];
+      // Find result and student info
+      const resultInfo = await Result.findOne({ _id: id });
 
-      for(let i = 0; i<sub_year.length ; i++){
-        let each_total_marks = 0;
-        let obj = array[index];
-        let value = obj.written + obj.practical;
-        let each_letter_grade = "A+", each_grade_point = 5;
-        
-        for(let j=0 ; j<74 ; j++){
-          if(sub_year[i][0] === total_exam_marks[j][0] && sub_year[i][1] === total_exam_marks[j][1]){
-              each_total_marks = (value*100) / total_exam_marks[j][2];
-              break;
+      // Subject and year of a specific student
+      const sub_year = [...resultInfo.studentInfo.subjectYear];
+      const sub_year_size = sub_year.length;
+      var final_letter_grade = "A+",
+        final_grade_point = 0;
+      
+        // Update total marks, letter grade, grade point
+      for (let i = 0; i < sub_year_size; i++) {
+        let obj = keep_written_practical_array[i];
+        const value = obj.written + obj.practical;
+        var each_total_marks = 0,
+          each_letter_grade = "A+",
+          each_grade_point = 5;
+
+        // Match the actual Subject & year with total_exam_marks keep_written_practical_array
+        for (let j = 0; j < 74; j++) {
+          if (
+            sub_year[i].subject === total_exam_marks[j][0] &&
+            sub_year[i].year === total_exam_marks[j][1]
+          ) {
+            each_total_marks = parseInt((value * 100) / total_exam_marks[j][2]);
+            console.log(each_total_marks);
+            break;
           }
         }
 
-        // Grading distribution
-        if(each_total_marks >= 70 && each_total_marks <= 79){
+        // letter grading and grading system distribution
+        if (each_total_marks >= 70 && each_total_marks <= 79) {
           each_letter_grade = "A";
           each_grade_point = 4;
-        }
-        else if(each_total_marks >= 60 && each_total_marks <= 69){
-          each_letter_grade = "A-"
+        } else if (each_total_marks >= 60 && each_total_marks <= 69) {
+          each_letter_grade = "A-";
           each_grade_point = 3.5;
-        }
-        else if(each_total_marks >= 50 && each_total_marks <= 59){
+        } else if (each_total_marks >= 50 && each_total_marks <= 59) {
           each_letter_grade = "B";
           each_grade_point = 3;
-        }
-        else if(each_total_marks >= 40 && each_total_marks <= 49){
+        } else if (each_total_marks >= 40 && each_total_marks <= 49) {
           each_letter_grade = "C";
           each_grade_point = 2;
-        }
-        else if(each_total_marks >= 33 && each_total_marks <= 39){
+        } else if (each_total_marks >= 33 && each_total_marks <= 39) {
           each_letter_grade = "D";
           each_grade_point = 1;
-        }
-        else{
+        } else if(each_total_marks < 33){
           each_letter_grade = "F";
           each_grade_point = 0;
         }
-        obj = { ...obj, total: value, letter_grade: each_letter_grade, grade_point: each_grade_point };
-        array[index] = obj;
+
+        final_grade_point += each_grade_point;
+
+        obj = {
+          ...obj,
+          total: value,
+          letter_grade: each_letter_grade,
+          grade_point: each_grade_point,
+        };
+        keep_written_practical_array[i] = obj;
       }
 
+      // Final letter grading and grading point distribution
+      final_grade_point = parseFloat(final_grade_point / sub_year_size).toFixed(1);
+      
+      if(final_grade_point == 4.0){
+        final_letter_grade = "A";
+      }
+      else if(final_grade_point == 3.5){
+        final_letter_grade = "A-";
+      }
+      else if(final_grade_point == 3.0){
+        final_letter_grade = "B";
+      }
+      else if(final_grade_point == 2.0){
+        final_letter_grade = "C";
+      }
+      else if(final_grade_point == 1.0){
+        final_letter_grade = "D";
+      }
+      else if (final_grade_point == 0.0) {
+        final_letter_grade = "F";
+      }
+      
       const resultUpdate = await Result.updateOne(
         { _id: id },
-        { $set: { writtenPractical: array } }
+        { $set: { writtenPractical: keep_written_practical_array , averageLetterGrade: final_letter_grade, averageGradePoint: final_grade_point } }
       );
       // console.log(resultUpdate);
-      
-      const result = resultInfo.writtenPractical;
+
+      const result = keep_written_practical_array;
+      // console.log(result)
       const updatedResult = [];
       for (let index = 0; index < result.length; index++) {
-        const { written, practical, total, letter_grade, grade_point } = result[index];
-        updatedResult.push({ written, practical, total, letter_grade, grade_point });
+        const { written, practical, total, letter_grade, grade_point } =
+          result[index];
+        updatedResult.push({
+          written,
+          practical,
+          total,
+          letter_grade,
+          grade_point,
+        });
       }
 
       responseReturn(res, 201, {
         updatedResult,
+        final_letter_grade,
+        final_grade_point,
         message: "Result data updated successfully",
       });
     } catch (error) {

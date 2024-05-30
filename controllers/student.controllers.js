@@ -74,7 +74,7 @@ class studentControllers {
             });
             // console.log(zone_info, school_info, total_student)
             const roll =
-              (zone_info.code * 1000 + school_info.school_code) * 10000 +
+              (zone_info.code * 10000 + school_info.school_code) * 10000 +
               total_student +
               1;
 
@@ -146,7 +146,6 @@ class studentControllers {
         .sort({ roll: 1 });
 
       const totalData = await Student.countDocuments();
-
       responseReturn(res, 201, {
         studentInfo,
         totalData,

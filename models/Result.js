@@ -1,5 +1,5 @@
 const { Schema, model, default: mongoose } = require("mongoose");
-const {ObjectId} = mongoose.Schema.Types;
+const { ObjectId } = mongoose.Schema.Types;
 
 const resultSchema = new Schema(
   {
@@ -55,9 +55,17 @@ const resultSchema = new Schema(
         grade_point: {
           type: Number,
           default: 0,
-        }
+        },
       },
     ],
+    averageLetterGrade: {
+      type: String,
+      default: "Null",
+    },
+    averageGradePoint: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

@@ -50,7 +50,7 @@ class schoolControllers {
         const total_school = await School.countDocuments({ zone });
         const zone_value = await Zone.findOne({ name: zone });
         const { code } = zone_value;
-        const school_code = code * 10 + total_school + 1;
+        const school_code = code * 1000 + total_school + 1;
         const principalInfo = { name: principal, email};
         const data = {
           school_name,
