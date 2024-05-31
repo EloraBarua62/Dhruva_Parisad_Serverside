@@ -117,7 +117,7 @@ class studentControllers {
             });
 
             const id = process.env.exam_result_date;
-              
+
             const dateInfo = await ExamResultDate.findOne({
               _id: id,
             });
@@ -136,14 +136,38 @@ class studentControllers {
 
   // Controller: Fetch student's details
   details = async (req, res) => {
-    const { page, parPage } = req.query;
+    const { page, searchValue, searchNumber, parPage } = req.query;
     const skipPage = parseInt(parPage) * (parseInt(page) - 1);
 
     try {
-      const studentInfo = await Student.find()
-        .skip(skipPage)
-        .limit(parPage)
-        .sort({ roll: 1 });
+      var studentInfo;
+      const search_number = parseInt(searchNumber);
+
+      if (searchValue.length > 0) {
+        if (search_number > 0) {
+          studentInfo = await Student.find({
+            $text: { $search: searchValue },
+            roll: search_number,
+          });
+        } else {
+          studentInfo = await Student.find({
+            $text: { $search: searchValue },
+          })
+            .skip(skipPage)
+            .limit(parPage)
+            .sort({ roll: 1 });
+        }
+      } else if (search_number != 0) {
+        studentInfo = await Student.find({
+          roll: search_number,
+        });
+      } else {
+        studentInfo = await Student.find()
+          .skip(skipPage)
+          .limit(parPage)
+          .sort({ roll: 1 });
+      }
+      console.log(studentInfo);
 
       const totalData = await Student.countDocuments();
       responseReturn(res, 201, {
@@ -172,16 +196,15 @@ class studentControllers {
     }
   };
 
-  
   // Controller: Delete Info
   delete_info = async (req, res) => {
     const id = req.params.id;
     try {
       const deleteStudentInfo = await Student.deleteOne({ _id: id });
       const deleteStudentResult = await Result.deleteOne({
-        "studentInfo.id": id
+        "studentInfo.id": id,
       });
-      
+
       if (
         deleteStudentInfo.deletedCount == 1 &&
         deleteStudentResult.deletedCount == 1

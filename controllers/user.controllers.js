@@ -125,19 +125,17 @@ class userControllers {
     if (userFound) {
       const resetToken = userFound.createResetPasswordToken();
       await userFound.save({ validateBeforeSave: false });
-      const resetUrl = `${req.protocol}://${req.get(
-        "host"
-      )}/api/v1/user/reset-password/${resetToken}`;
+      const resetUrl = `${req.protocol}://localhost:3000/reset_password/${resetToken}`;
       // const message = `We have received a password reset request. Please use the below link to reset your password. This link will be valid for 10 minutes`;
       const message = `We have received a password reset request. Please use the below link to reset your password\n\n${resetUrl} \n\n This link will be valid for 10 minutes`;
 
       try {
-        // await sendEmail({
-        //   email: userFound.email,
-        //   subject: "Password change request received",
-        //   message: message,
-        //   resetUrl,
-        // });
+        await sendEmail({
+          email: userFound.email,
+          name : '',
+          subject: "Reset your password",
+          message: message,
+        });
         responseReturn(res, 200, {
           message: "Password reset link send to the user email",
         });
@@ -159,9 +157,10 @@ class userControllers {
   reset_password = async (req, res) => {
     const token = crypto
       .createHash("sha256")
-      .update(req.params.token)
+      .update(req.body.token)
       .digest("hex");
-    const user = await User.findOne({
+    
+      const user = await User.findOne({
       passwordResetToken: token,
       passwordResetTokenExpires: { $gt: Date.now() },
     });
@@ -172,7 +171,6 @@ class userControllers {
       user.passwordResetToken = undefined;
       user.passwordResetTokenExpires = undefined;
       user.passwordChangedAt = Date.now();
-
       user.save();
 
       const token = await createToken({
@@ -186,6 +184,7 @@ class userControllers {
       const userInfo = {
         name: user.name,
         email: user.email,
+        role: user.role,
       };
       responseReturn(res, 200, {
         userInfo,

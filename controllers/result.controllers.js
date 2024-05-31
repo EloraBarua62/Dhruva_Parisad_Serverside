@@ -19,7 +19,13 @@ class resultControllers {
 
       // Extracting all data
       resultList.forEach((element) => {
-        let { studentInfo, writtenPractical, _id, averageLetterGrade, averageGradePoint } = element;
+        let {
+          studentInfo,
+          writtenPractical,
+          _id,
+          averageLetterGrade,
+          averageGradePoint,
+        } = element;
         let { id, roll, ...otherInfo } = studentInfo;
         studentInfo = { ...otherInfo, roll };
 
@@ -78,10 +84,17 @@ class resultControllers {
         const resultInfo = await Result.find({
           "studentInfo.school_code": school_code,
         }).sort({ "studentInfo.roll": 1 });
-        responseReturn(res, 201, {
-          resultInfo,
-          message: "Result data loaded successfully",
-        });
+
+        if (resultInfo.length > 0) {
+          responseReturn(res, 201, {
+            resultInfo,
+            message: "Result data loaded successfully",
+          });
+        }
+        else{
+          responseReturn(res, 400, {
+            error: "No student is registered"})
+        }
       }
     } catch (error) {
       responseReturn(res, 500, { error: error.message });
@@ -109,7 +122,7 @@ class resultControllers {
         father_name: personalInfo?.father_name,
         mother_name: personalInfo?.mother_name,
       };
-      
+
       if (studentResultInfo) {
         responseReturn(res, 201, {
           studentResultInfo,
@@ -218,8 +231,8 @@ class resultControllers {
       const sub_year_size = sub_year.length;
       var final_letter_grade = "A+",
         final_grade_point = 0;
-      
-        // Update total marks, letter grade, grade point
+
+      // Update total marks, letter grade, grade point
       for (let i = 0; i < sub_year_size; i++) {
         let obj = keep_written_practical_array[i];
         const value = obj.written + obj.practical;
@@ -255,7 +268,7 @@ class resultControllers {
         } else if (each_total_marks >= 33 && each_total_marks <= 39) {
           each_letter_grade = "D";
           each_grade_point = 1;
-        } else if(each_total_marks < 33){
+        } else if (each_total_marks < 33) {
           each_letter_grade = "F";
           each_grade_point = 0;
         }
@@ -272,30 +285,33 @@ class resultControllers {
       }
 
       // Final letter grading and grading point distribution
-      final_grade_point = parseFloat(final_grade_point / sub_year_size).toFixed(1);
-      
-      if(final_grade_point == 4.0){
+      final_grade_point = parseFloat(final_grade_point / sub_year_size).toFixed(
+        1
+      );
+
+      if (final_grade_point == 4.0) {
         final_letter_grade = "A";
-      }
-      else if(final_grade_point == 3.5){
+      } else if (final_grade_point == 3.5) {
         final_letter_grade = "A-";
-      }
-      else if(final_grade_point == 3.0){
+      } else if (final_grade_point == 3.0) {
         final_letter_grade = "B";
-      }
-      else if(final_grade_point == 2.0){
+      } else if (final_grade_point == 2.0) {
         final_letter_grade = "C";
-      }
-      else if(final_grade_point == 1.0){
+      } else if (final_grade_point == 1.0) {
         final_letter_grade = "D";
-      }
-      else if (final_grade_point == 0.0) {
+      } else if (final_grade_point == 0.0) {
         final_letter_grade = "F";
       }
-      
+
       const resultUpdate = await Result.updateOne(
         { _id: id },
-        { $set: { writtenPractical: keep_written_practical_array , averageLetterGrade: final_letter_grade, averageGradePoint: final_grade_point } }
+        {
+          $set: {
+            writtenPractical: keep_written_practical_array,
+            averageLetterGrade: final_letter_grade,
+            averageGradePoint: final_grade_point,
+          },
+        }
       );
       // console.log(resultUpdate);
 

@@ -61,7 +61,7 @@ class newsControllers {
 
       responseReturn(res, 201, {
         newsList,
-        important_date: date.result_date,
+        important_date: { exam_date: date.exam_date, result_date: date.result_date},
         message: "News list loaded successfully",
       });
     } catch (error) {

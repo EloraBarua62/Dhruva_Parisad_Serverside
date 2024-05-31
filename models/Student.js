@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const studentControllers = require("../controllers/student.controllers");
 
 const studentSchema = new Schema(
   {
@@ -69,5 +70,9 @@ const studentSchema = new Schema(
   },
   { timestamps: true }
 );
+
+studentSchema.index({
+  student_name: 'text'
+})
 
 module.exports = model("Student", studentSchema);

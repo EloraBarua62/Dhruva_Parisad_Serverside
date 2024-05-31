@@ -14,7 +14,7 @@ module.exports.sendEmail = async (option) => {
     to: option.email,
     subject: option.subject,
     html: `<div>
-              <h3>Dear ${option.name}</h3>
+              <h4>Hello ${option.name},</h4>
               <p>${option.message}</p>
           </div>`
   };
