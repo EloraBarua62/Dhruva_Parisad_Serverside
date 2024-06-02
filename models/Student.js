@@ -57,6 +57,11 @@ const studentSchema = new Schema(
       trim: true,
       required: true,
     },
+    last_registration_year: {
+      type: Number,
+      required: true,
+      default: new Date().getFullYear(),
+    },
     imageShow: {
       type: String,
       trim: true,

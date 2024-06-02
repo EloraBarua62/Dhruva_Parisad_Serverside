@@ -10,8 +10,8 @@ const cloudinary = require("cloudinary").v2;
 // const mongoose = require("mongoose");
 
 class studentControllers {
-  // Controller: Exam registration
-  registration = async (req, res) => {
+  // Controller: Exam registration for new student
+  new_registration = async (req, res) => {
     const form = new formidable.IncomingForm();
     form.parse(req, async (err, fields, files) => {
       if (err) {
@@ -68,16 +68,19 @@ class studentControllers {
               school_name: school,
               zone: zone,
             });
+
             const total_student = await Student.countDocuments({
               school,
               zone,
             });
-            // console.log(zone_info, school_info, total_student)
+
+            const year = new Date().getFullYear() ;
             const roll =
-              (zone_info.code * 10000 + school_info.school_code) * 10000 +
+              ((year % 1000) * 10000 + school_info.school_code) * 1000 +
               total_student +
               1;
 
+              console.log(roll)
             const createStudent = await Student.create({
               roll,
               student_name,
@@ -117,7 +120,6 @@ class studentControllers {
             });
 
             const id = process.env.exam_result_date;
-
             const dateInfo = await ExamResultDate.findOne({
               _id: id,
             });
@@ -132,6 +134,144 @@ class studentControllers {
         }
       }
     });
+  };
+
+  
+  
+  // Controller: Update exam registration for previous student
+  previous_registration = async (req, res) => {
+    const roll = req.params.roll;
+    const { zone, school, subjectYear } = req.body;
+
+    console.log(subjectYear)
+    try {
+      // Searching if this student exist,
+      // if yes, then registration info update,
+      // else, student should complete new registration
+      const student_found = await Student.findOne({ roll: roll });
+      if (student_found) {
+        // Searching school info to update
+        const school_info = await School.findOne({
+          school_name: school,
+          zone: zone,
+        });
+
+        // Searching how much student complete registration process current year
+        const year = new Date().getFullYear();
+        const current_year_student = await Student.countDocuments({
+          zone,
+          school,
+          last_registration_year: year,
+        });
+
+        // Generating new roll depending on current year
+        const { school_code } = school_info;
+        const new_roll =
+          ((year % 1000) * 10000 + school_code) * 1000 +
+          current_year_student +
+          1;
+
+          console.log(new_roll)
+        // Update student info
+        const student_info_updated = await Student.updateOne(
+          { _id: student_found._id },
+          {
+            $set: {
+              roll: new_roll,
+              zone,
+              school,
+              school_code,
+              subjectYear,
+              last_registration_year: year,
+              payment: "Unpaid",
+            },
+          }
+        );
+
+        // Checking if student info updated or not,
+        // IF yes, result data of that student will be updated
+
+        console.log(student_info_updated)
+        if (student_info_updated.modifiedCount == 1) {
+          const result_info_found = await Result.findOne({
+            "studentInfo.id": student_found._id,
+          });
+
+          // Keep student info from Result
+          let keep_result_data = {
+            ...result_info_found.studentInfo,
+          };
+          keep_result_data = {
+            ...keep_result_data,
+            subjectYear,
+            roll: new_roll,
+            school_code,
+          };
+
+          // Generate new written practical array for updated result
+          let keepWrittenPractical = [];
+          subjectYear.map((data, index) =>
+            keepWrittenPractical.push({
+              written: 0,
+              practical: 0,
+              total: 0,
+              letter_grade: "Null",
+              grade_point: 0,
+            })
+          );
+
+          const result_info_updated = await Result.updateOne(
+            { _id: result_info_found._id },
+            {
+              $set: {
+                studentInfo: keep_result_data,
+                writtenPractical: keepWrittenPractical,
+                averageLetterGrade: "Null",
+                averageGradePoint: 0,
+              },
+            }
+          );
+
+          const id = process.env.exam_result_date;
+          const dateInfo = await ExamResultDate.findOne({
+            _id: id,
+          });
+
+          const student_data = {
+            student_name: student_found.student_name,
+            father_name: student_found.father_name,
+            mother_name: student_found.mother_name,
+            imageShow: student_found.imageShow,
+            roll: new_roll,
+            school,   
+            subjectYear        
+          }
+
+          if (result_info_updated.modifiedCount == 1) {
+            responseReturn(res, 201, {
+              exam_date: dateInfo.exam_date,
+              studentDetail: student_data,
+              message: "Registration successfully completed",
+            });
+          } else {
+            responseReturn(res, 400, {
+              error: "Result didn't update properly",
+            });
+          }
+        } else {
+          responseReturn(res, 400, {
+            error: "Student info didn't update properly",
+          });
+        }
+      } else {
+        responseReturn(res, 400, {
+          error:
+            "Sorry, your roll number not found. Please register as a new student",
+        });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
+    }
   };
 
   // Controller: Fetch student's details

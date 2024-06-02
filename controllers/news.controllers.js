@@ -57,8 +57,6 @@ class newsControllers {
       const id = process.env.exam_result_date;
       const newsList = await News.find().sort({ updatedAt: -1 }).limit(count);
       const date = await ExamResultDate.findOne({_id: id});
-      console.log(date.result_date)
-
       responseReturn(res, 201, {
         newsList,
         important_date: { exam_date: date.exam_date, result_date: date.result_date},
@@ -128,7 +126,6 @@ class newsControllers {
   // Controller: Update Exam and Result info
   exam_result = async (req, res) => {
     const id = process.env.exam_result_date;
-    console.log(id)
     const data = req.body;
 
     try {
