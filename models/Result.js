@@ -66,6 +66,11 @@ const resultSchema = new Schema(
       type: Number,
       default: 0,
     },
+    resultStatus: {
+      type: String,
+      enum: ["Running", "Finish"],
+      default: "Running",
+    },
   },
   { timestamps: true }
 );

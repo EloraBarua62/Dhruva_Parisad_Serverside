@@ -20,6 +20,11 @@ router.get(
   resultController.student_result_display
 );
 router.patch("/result-update/:id",verifyToken, resultController.result_update);
+router.post(
+  "/previous-result",
+  verifyToken,
+  resultController.previous_result
+);
 // router.get("/details", studentController.details);
 
 module.exports = router;

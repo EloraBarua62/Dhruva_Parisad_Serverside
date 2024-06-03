@@ -1,3 +1,4 @@
+const PreviousResult = require("../models/PreviousResult");
 const Result = require("../models/Result");
 const School = require("../models/School");
 const Student = require("../models/Student");
@@ -25,9 +26,10 @@ class resultControllers {
           _id,
           averageLetterGrade,
           averageGradePoint,
+          resultStatus
         } = element;
         let { id, roll, ...otherInfo } = studentInfo;
-        studentInfo = { ...otherInfo, roll };
+        studentInfo = { ...otherInfo, id, roll };
 
         // Updating written praitcal number
         const updatedResult = [];
@@ -49,6 +51,7 @@ class resultControllers {
           _id,
           averageLetterGrade,
           averageGradePoint,
+          resultStatus,
         });
       });
 
@@ -90,10 +93,10 @@ class resultControllers {
             resultInfo,
             message: "Result data loaded successfully",
           });
-        }
-        else{
+        } else {
           responseReturn(res, 400, {
-            error: "No student is registered"})
+            error: "No student is registered",
+          });
         }
       }
     } catch (error) {
@@ -229,7 +232,7 @@ class resultControllers {
       // Subject and year of a specific student
       const sub_year = [...resultInfo.studentInfo.subjectYear];
       const sub_year_size = sub_year.length;
-      var final_letter_grade = "A+",
+      var final_letter_grade = "F",
         final_grade_point = 0;
 
       // Update total marks, letter grade, grade point
@@ -247,7 +250,6 @@ class resultControllers {
             sub_year[i].year === total_exam_marks[j][1]
           ) {
             each_total_marks = parseInt((value * 100) / total_exam_marks[j][2]);
-            console.log(each_total_marks);
             break;
           }
         }
@@ -274,7 +276,6 @@ class resultControllers {
         }
 
         final_grade_point += each_grade_point;
-
         obj = {
           ...obj,
           total: value,
@@ -289,17 +290,24 @@ class resultControllers {
         1
       );
 
-      if (final_grade_point == 4.0) {
-        final_letter_grade = "A";
-      } else if (final_grade_point == 3.5) {
+      if (final_grade_point < 4 && final_grade_point >= 3.5) {
         final_letter_grade = "A-";
-      } else if (final_grade_point == 3.0) {
+        final_grade_point = 3.5;
+      }
+
+      final_grade_point = parseInt(final_grade_point);
+
+      if (final_grade_point == 5) {
+        final_letter_grade = "A+";
+      } else if (final_grade_point == 4) {
+        final_letter_grade = "A";
+      } else if (final_grade_point == 3) {
         final_letter_grade = "B";
-      } else if (final_grade_point == 2.0) {
+      } else if (final_grade_point == 2) {
         final_letter_grade = "C";
-      } else if (final_grade_point == 1.0) {
+      } else if (final_grade_point == 1) {
         final_letter_grade = "D";
-      } else if (final_grade_point == 0.0) {
+      } else if (final_grade_point == 0) {
         final_letter_grade = "F";
       }
 
@@ -313,10 +321,8 @@ class resultControllers {
           },
         }
       );
-      // console.log(resultUpdate);
 
       const result = keep_written_practical_array;
-      // console.log(result)
       const updatedResult = [];
       for (let index = 0; index < result.length; index++) {
         const { written, practical, total, letter_grade, grade_point } =
@@ -340,6 +346,110 @@ class resultControllers {
       responseReturn(res, 500, { error: error.message });
     }
   };
+
+  previous_result = async (req, res) => {
+    const {id} = req.body;
+    try {
+      const studentFound = await Student.findOne({_id: id});
+      const resultFound = await Result.findOne({"studentInfo.id": id});
+      const previousResultFound = await PreviousResult.findOne({"personalInfo.id": id});
+
+      if(previousResultFound){
+        let keep_result = { ...previousResultFound.result };
+        const year = new Date().getFullYear() + '';
+        const result_history = [
+          {
+            roll: studentFound.roll,
+            averageLetterGrade: resultFound.averageLetterGrade,
+            averageGradePoint: resultFound.averageGradePoint,
+          },
+          ...overall_result,
+        ];
+        keep_result = {
+          ...keep_result,
+          [year]: result_history
+        }
+        console.log(result_history);
+        console.log(keep_result);
+        const previousResultUpdate = await PreviousResult.updateOne({
+          _id: previousResultFound._id},
+          {$set: {
+              result: keep_result
+            }}      
+        );
+
+         if (previousResultUpdate) {
+           responseReturn(res, 201, {
+             message: "Data updated successfully",
+           });
+         } else {
+           responseReturn(res, 400, {
+             message: "Sorry, Data updation failed",
+           });
+         }
+      }
+      else{
+        const student_personal_info = {
+          id,
+          email: studentFound.email,
+          student_name: studentFound.student_name,
+          father_name: studentFound.father_name,
+          mother_name: studentFound.mother_name,
+        };
+
+        const year = new Date().getFullYear() + "";
+
+        const {subjectYear} = resultFound.studentInfo;
+        let written_practical = [...resultFound.writtenPractical];
+        const size = written_practical.length;
+
+        const result_history = {
+          [year]: [
+            {
+              roll: studentFound.roll,
+              averageLetterGrade: resultFound.averageLetterGrade,
+              averageGradePoint: resultFound.averageGradePoint,
+            },
+          ],
+        };
+        
+        console.log(result_history)
+        for(let i=0 ; i<size ; i++){
+          let {written, practical,total, letter_grade, grade_point} = written_practical[i];
+          let obj = { subject: subjectYear[i].subject , year:  subjectYear[i].year, written, practical,total, letter_grade, grade_point};
+          // overall_result.push(obj);
+          result_history[year].push(obj)
+        }
+        
+        console.log(result_history)
+        const previous_result_insert = await PreviousResult.create({
+          personalInfo: student_personal_info,
+          result: result_history,
+        });
+
+        const result_status_update = await Result.updateOne(
+          {
+          "studentInfo.id": id},
+          {$set: {
+              resultStatus: "Finish"
+            }}
+        );
+        
+        if(previous_result_insert && result_status_update){
+          responseReturn(res, 201, {
+            message: "Data inserted successfully",
+          });
+        }
+        else{
+          responseReturn(res, 400, {
+            message: "Sorry, Data insertion failed",
+          });
+        }
+      }
+    } catch (error) {
+       responseReturn(res, 500, { error: error.message });
+    }
+  }
 }
 
 module.exports = new resultControllers();

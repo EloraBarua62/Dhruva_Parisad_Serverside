@@ -5,6 +5,7 @@ const { promisify } = require("util");
 module.exports.verifyToken = async (req, res, next) => {
   try {
     const token = req?.cookies?.accessToken;
+
     if (!token) {
       responseReturn(res, 401, {
         message: "Unauthorized access",

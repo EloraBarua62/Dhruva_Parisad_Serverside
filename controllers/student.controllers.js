@@ -143,7 +143,6 @@ class studentControllers {
     const roll = req.params.roll;
     const { zone, school, subjectYear } = req.body;
 
-    console.log(subjectYear)
     try {
       // Searching if this student exist,
       // if yes, then registration info update,
@@ -171,7 +170,6 @@ class studentControllers {
           current_year_student +
           1;
 
-          console.log(new_roll)
         // Update student info
         const student_info_updated = await Student.updateOne(
           { _id: student_found._id },
@@ -190,8 +188,6 @@ class studentControllers {
 
         // Checking if student info updated or not,
         // IF yes, result data of that student will be updated
-
-        console.log(student_info_updated)
         if (student_info_updated.modifiedCount == 1) {
           const result_info_found = await Result.findOne({
             "studentInfo.id": student_found._id,
@@ -228,6 +224,7 @@ class studentControllers {
                 writtenPractical: keepWrittenPractical,
                 averageLetterGrade: "Null",
                 averageGradePoint: 0,
+                resultStatus: "Running",
               },
             }
           );
@@ -307,7 +304,6 @@ class studentControllers {
           .limit(parPage)
           .sort({ roll: 1 });
       }
-      console.log(studentInfo);
 
       const totalData = await Student.countDocuments();
       responseReturn(res, 201, {
