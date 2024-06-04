@@ -25,6 +25,6 @@ router.post(
   verifyToken,
   resultController.previous_result
 );
-// router.get("/details", studentController.details);
+router.get("/previous-display", verifyToken, resultController.previous_display);
 
 module.exports = router;

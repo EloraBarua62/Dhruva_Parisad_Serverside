@@ -36,4 +36,8 @@ const previousResultSchema = new Schema(
   { timestamps: true }
 );
 
+previousResultSchema.index({
+  "personalInfo.email": "text",
+});
+
 module.exports = model("previousResult", previousResultSchema);

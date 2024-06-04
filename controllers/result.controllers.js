@@ -26,7 +26,7 @@ class resultControllers {
           _id,
           averageLetterGrade,
           averageGradePoint,
-          resultStatus
+          resultStatus,
         } = element;
         let { id, roll, ...otherInfo } = studentInfo;
         studentInfo = { ...otherInfo, id, roll };
@@ -348,15 +348,17 @@ class resultControllers {
   };
 
   previous_result = async (req, res) => {
-    const {id} = req.body;
+    const { id } = req.body;
     try {
-      const studentFound = await Student.findOne({_id: id});
-      const resultFound = await Result.findOne({"studentInfo.id": id});
-      const previousResultFound = await PreviousResult.findOne({"personalInfo.id": id});
+      const studentFound = await Student.findOne({ _id: id });
+      const resultFound = await Result.findOne({ "studentInfo.id": id });
+      const previousResultFound = await PreviousResult.findOne({
+        "personalInfo.id": id,
+      });
 
-      if(previousResultFound){
+      if (previousResultFound) {
         let keep_result = { ...previousResultFound.result };
-        const year = new Date().getFullYear() + '';
+        const year = new Date().getFullYear() + "";
         const result_history = [
           {
             roll: studentFound.roll,
@@ -367,28 +369,31 @@ class resultControllers {
         ];
         keep_result = {
           ...keep_result,
-          [year]: result_history
-        }
+          [year]: result_history,
+        };
         console.log(result_history);
         console.log(keep_result);
-        const previousResultUpdate = await PreviousResult.updateOne({
-          _id: previousResultFound._id},
-          {$set: {
-              result: keep_result
-            }}      
+        const previousResultUpdate = await PreviousResult.updateOne(
+          {
+            _id: previousResultFound._id,
+          },
+          {
+            $set: {
+              result: keep_result,
+            },
+          }
         );
 
-         if (previousResultUpdate) {
-           responseReturn(res, 201, {
-             message: "Data updated successfully",
-           });
-         } else {
-           responseReturn(res, 400, {
-             message: "Sorry, Data updation failed",
-           });
-         }
-      }
-      else{
+        if (previousResultUpdate) {
+          responseReturn(res, 201, {
+            message: "Data updated successfully",
+          });
+        } else {
+          responseReturn(res, 400, {
+            message: "Sorry, Data updation failed",
+          });
+        }
+      } else {
         const student_personal_info = {
           id,
           email: studentFound.email,
@@ -399,7 +404,7 @@ class resultControllers {
 
         const year = new Date().getFullYear() + "";
 
-        const {subjectYear} = resultFound.studentInfo;
+        const { subjectYear } = resultFound.studentInfo;
         let written_practical = [...resultFound.writtenPractical];
         const size = written_practical.length;
 
@@ -412,16 +417,23 @@ class resultControllers {
             },
           ],
         };
-        
-        console.log(result_history)
-        for(let i=0 ; i<size ; i++){
-          let {written, practical,total, letter_grade, grade_point} = written_practical[i];
-          let obj = { subject: subjectYear[i].subject , year:  subjectYear[i].year, written, practical,total, letter_grade, grade_point};
+
+        for (let i = 0; i < size; i++) {
+          let { written, practical, total, letter_grade, grade_point } =
+            written_practical[i];
+          let obj = {
+            subject: subjectYear[i].subject,
+            year: subjectYear[i].year,
+            written,
+            practical,
+            total,
+            letter_grade,
+            grade_point,
+          };
           // overall_result.push(obj);
-          result_history[year].push(obj)
+          result_history[year].push(obj);
         }
-        
-        console.log(result_history)
+
         const previous_result_insert = await PreviousResult.create({
           personalInfo: student_personal_info,
           result: result_history,
@@ -429,25 +441,89 @@ class resultControllers {
 
         const result_status_update = await Result.updateOne(
           {
-          "studentInfo.id": id},
-          {$set: {
-              resultStatus: "Finish"
-            }}
+            "studentInfo.id": id,
+          },
+          {
+            $set: {
+              resultStatus: "Finish",
+            },
+          }
         );
-        
-        if(previous_result_insert && result_status_update){
+
+        if (previous_result_insert && result_status_update) {
           responseReturn(res, 201, {
             message: "Data inserted successfully",
           });
-        }
-        else{
+        } else {
           responseReturn(res, 400, {
             message: "Sorry, Data insertion failed",
           });
         }
       }
     } catch (error) {
-       responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: error.message });
+    }
+  };
+
+  previous_display = async(req, res) => {
+    const { page, searchValue,  parPage } = req.query;
+    const skipPage = parseInt(parPage) * (parseInt(page) - 1);
+    try {
+      let previous_result_found=[];
+      if(searchValue.length > 0){
+        previous_result_found = await PreviousResult.find({
+          "personalInfo.email": searchValue,
+        })
+          .skip(skipPage)
+          .limit(parPage)
+        .sort({ createdAt: 1 });
+      }
+      else{
+        previous_result_found = await PreviousResult.find()
+          .skip(skipPage)
+          .limit(parPage)
+        .sort({ createdAt: 1 });
+      }
+     
+      
+      if (previous_result_found) {
+        let final_child_array = [],
+          final_parent_array = [],
+          final_personal_info=[];
+        const keep_previous_data = [...previous_result_found];
+        const size = previous_result_found.length;
+
+        for(let i=0 ; i<size ; i++){
+          let { student_name, email, father_name, mother_name } =
+            keep_previous_data[i].personalInfo; 
+          let keep_result_object = keep_previous_data[i].result;
+          let keys = Object.values(keep_result_object);
+          final_personal_info.push({student_name, email, father_name, mother_name});
+          final_child_array = [];
+
+          const keys_size = keys.length;
+          for(let j=0; j<keys_size ; j++){
+            final_child_array.push(keys[j][0]);
+          }
+          console.log(final_child_array) 
+          final_parent_array.push(final_child_array); 
+    
+        }
+        
+        console.log(final_parent_array)       
+        responseReturn(res, 201, {
+          final_personal_info,
+          final_parent_array,
+          totalData: previous_result_found.length,
+          message: "Previous Result Data loaded successfully",
+        });
+      } else {
+        responseReturn(res, 400, {
+          error: "Failed to load previous data",
+        });
+      }
+    } catch (error) {
+      responseReturn(res, 500, { error: error.message });
     }
   }
 }
