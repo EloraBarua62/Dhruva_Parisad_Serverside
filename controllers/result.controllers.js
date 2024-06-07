@@ -240,8 +240,8 @@ class resultControllers {
         let obj = keep_written_practical_array[i];
         const value = obj.written + obj.practical;
         var each_total_marks = 0,
-          each_letter_grade = "A+",
-          each_grade_point = 5;
+          each_letter_grade = "Null",
+          each_grade_point = 0;
 
         // Match the actual Subject & year with total_exam_marks keep_written_practical_array
         for (let j = 0; j < 74; j++) {
@@ -255,10 +255,15 @@ class resultControllers {
         }
 
         // letter grading and grading system distribution
-        if (each_total_marks >= 70 && each_total_marks <= 79) {
+        if (each_total_marks >= 80 && each_total_marks <= 100) {
+          each_letter_grade = "A+";
+          each_grade_point = 5;
+        } 
+        else if (each_total_marks >= 70 && each_total_marks <= 79) {
           each_letter_grade = "A";
           each_grade_point = 4;
-        } else if (each_total_marks >= 60 && each_total_marks <= 69) {
+        } 
+        else if (each_total_marks >= 60 && each_total_marks <= 69) {
           each_letter_grade = "A-";
           each_grade_point = 3.5;
         } else if (each_total_marks >= 50 && each_total_marks <= 59) {

@@ -44,8 +44,8 @@ class userControllers {
             role: createUser.role,
           });
           res.cookie("accessToken", token, {
-            // httpOnly: false,
-            // sameSite: "none",
+            httpOnly: false,
+            sameSite: "none",
             secure: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
@@ -93,8 +93,8 @@ class userControllers {
             role: user.role,
           });
           res.cookie("accessToken", token, {
-            // httpOnly: false,
-            // sameSite: 'none',
+            httpOnly: false,
+            sameSite: 'none',
             secure: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
@@ -125,7 +125,7 @@ class userControllers {
     if (userFound) {
       const resetToken = userFound.createResetPasswordToken();
       await userFound.save({ validateBeforeSave: false });
-      const resetUrl = `${req.protocol}://localhost:3000/reset_password/${resetToken}`;
+      const resetUrl = `https://dhruva-parisad-clientside.vercel.app/reset_password/${resetToken}`;
       // const message = `We have received a password reset request. Please use the below link to reset your password. This link will be valid for 10 minutes`;
       const message = `We have received a password reset request. Please use the below link to reset your password\n\n${resetUrl} \n\n This link will be valid for 10 minutes`;
 
