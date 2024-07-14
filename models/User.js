@@ -15,7 +15,6 @@ const userSchema = new Schema(
       trim: true,
       lowercase: true,
       validate: [validator.isEmail, "Please provide a valid email"],
-      required: true,
     },
     password: {
       type: String,
@@ -54,8 +53,6 @@ userSchema.methods.createResetPasswordToken = function(){
 
   this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
   this.passwordResetTokenExpires = Date.now() + 10 * 60 * 1000;
-
-  console.log(resetToken, this.passwordResetToken)
   return resetToken;
 }
 

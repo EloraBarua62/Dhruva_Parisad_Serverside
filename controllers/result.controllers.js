@@ -63,7 +63,7 @@ class resultControllers {
         message: "Result data loaded successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -100,45 +100,49 @@ class resultControllers {
         }
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
   student_result_display = async (req, res) => {
-    const token = req?.cookies?.accessToken;
-    const data = jwt.verify(token, process.env.SECRET_KEY);
-    const email = data.email;
-    const roll = parseInt(req.params.roll);
+    // const token = req?.cookies?.accessToken;
+    // const data = jwt.verify(token, process.env.SECRET_KEY);
+    let { roll, year } = req.query;
+    roll = parseInt(roll);
 
     try {
-      const studentResultInfo = await Result.findOne({
-        "studentInfo.email": email,
-        "studentInfo.roll": roll,
-      });
+      const resultInfoArray = await PreviousResult.find({});
+      const result_length = resultInfoArray.length;
+      let studentResultInfo = [],
+        studentPersonalInfo = {};
 
-      // Extracting personal details
-      const personalInfo = await Student.findOne({
-        email: email,
-        roll: roll,
-      });
-      const studentPersonalInfo = {
-        father_name: personalInfo?.father_name,
-        mother_name: personalInfo?.mother_name,
-      };
-
-      if (studentResultInfo) {
+      for (let i = 0; i < result_length; i++) {
+        let keep_result_object = resultInfoArray[i]?.result[year];
+        let keep_personal_info_object = resultInfoArray[i]?.personalInfo;
+        if (keep_result_object[0]?.roll === roll && keep_result_object.length) {
+          studentPersonalInfo = {
+            student_name: keep_personal_info_object?.student_name,
+            father_name: keep_personal_info_object?.father_name,
+            mother_name: keep_personal_info_object?.mother_name,
+            school: keep_personal_info_object?.school,
+          };
+          studentResultInfo = keep_result_object;
+          break;
+        }
+      }
+      if (!studentResultInfo.length) {
+        responseReturn(res, 500, {
+          error: "Your student roll or year is incorrect, Try again",
+        });
+      } else {
         responseReturn(res, 201, {
           studentResultInfo,
           studentPersonalInfo,
           message: "Result data loaded successfully",
         });
-      } else {
-        responseReturn(res, 400, {
-          error: "Your student roll is incorrect, Try again",
-        });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "No data found" });
     }
   };
 
@@ -149,8 +153,8 @@ class resultControllers {
 
     // Marking system
     const total_exam_marks = [
-      ["Rhyme", "Primary", 250],
-      ["Patriotic Song", "Primary", 250],
+      ["Rhyme", "Primary", 100],
+      ["Patriotic Song", "Primary", 100],
       ["Rabindra Sangeet", "First", 250],
       ["Rabindra Sangeet", "Second", 350],
       ["Rabindra Sangeet", "Third", 420],
@@ -187,11 +191,12 @@ class resultControllers {
       ["Classical Music", "Seventh", 700],
       ["Classical Music", "Eighth", 1000],
       ["Classical Music", "Ninth", 1000],
+      ["Recitation(Abrtti)", "Primary", 100],
       ["Recitation(Abrtti)", "First", 100],
-      ["Recitation(Abrtti)", "Second", 100],
+      ["Recitation(Abrtti)", "Second", 250],
       ["Recitation(Abrtti)", "Third", 300],
       ["Recitation(Abrtti)", "Forth", 400],
-      ["Recitation(Abrtti)", "Fifth", 300],
+      ["Recitation(Abrtti)", "Fifth", 450],
       ["Recitation(Abrtti)", "Sixth", 500],
       ["Recitation(Abrtti)", "Seventh", 500],
       ["Recitation(Abrtti)", "Eighth", 700],
@@ -205,6 +210,7 @@ class resultControllers {
       ["Tabla", "Seventh", 700],
       ["Tabla", "Eighth", 800],
       ["Tabla", "Ninth", 1100],
+      ["Dance", "Primary", 100],
       ["Dance", "First", 250],
       ["Dance", "Second", 300],
       ["Dance", "Third", 350],
@@ -258,12 +264,10 @@ class resultControllers {
         if (each_total_marks >= 80 && each_total_marks <= 100) {
           each_letter_grade = "A+";
           each_grade_point = 5;
-        } 
-        else if (each_total_marks >= 70 && each_total_marks <= 79) {
+        } else if (each_total_marks >= 70 && each_total_marks <= 79) {
           each_letter_grade = "A";
           each_grade_point = 4;
-        } 
-        else if (each_total_marks >= 60 && each_total_marks <= 69) {
+        } else if (each_total_marks >= 60 && each_total_marks <= 69) {
           each_letter_grade = "A-";
           each_grade_point = 3.5;
         } else if (each_total_marks >= 50 && each_total_marks <= 59) {
@@ -298,22 +302,21 @@ class resultControllers {
       if (final_grade_point < 4 && final_grade_point >= 3.5) {
         final_letter_grade = "A-";
         final_grade_point = 3.5;
-      }
-
-      final_grade_point = parseInt(final_grade_point);
-
-      if (final_grade_point == 5) {
-        final_letter_grade = "A+";
-      } else if (final_grade_point == 4) {
-        final_letter_grade = "A";
-      } else if (final_grade_point == 3) {
-        final_letter_grade = "B";
-      } else if (final_grade_point == 2) {
-        final_letter_grade = "C";
-      } else if (final_grade_point == 1) {
-        final_letter_grade = "D";
-      } else if (final_grade_point == 0) {
-        final_letter_grade = "F";
+      } else {
+        final_grade_point = parseInt(final_grade_point);
+        if (final_grade_point == 5) {
+          final_letter_grade = "A+";
+        } else if (final_grade_point == 4) {
+          final_letter_grade = "A";
+        } else if (final_grade_point == 3) {
+          final_letter_grade = "B";
+        } else if (final_grade_point == 2) {
+          final_letter_grade = "C";
+        } else if (final_grade_point == 1) {
+          final_letter_grade = "D";
+        } else if (final_grade_point == 0) {
+          final_letter_grade = "F";
+        }
       }
 
       const resultUpdate = await Result.updateOne(
@@ -348,7 +351,7 @@ class resultControllers {
         message: "Result data updated successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -367,6 +370,7 @@ class resultControllers {
         const result_history = [
           {
             roll: studentFound.roll,
+            school: studentFound.school,
             averageLetterGrade: resultFound.averageLetterGrade,
             averageGradePoint: resultFound.averageGradePoint,
           },
@@ -376,8 +380,6 @@ class resultControllers {
           ...keep_result,
           [year]: result_history,
         };
-        console.log(result_history);
-        console.log(keep_result);
         const previousResultUpdate = await PreviousResult.updateOne(
           {
             _id: previousResultFound._id,
@@ -401,10 +403,11 @@ class resultControllers {
       } else {
         const student_personal_info = {
           id,
-          email: studentFound.email,
           student_name: studentFound.student_name,
           father_name: studentFound.father_name,
           mother_name: studentFound.mother_name,
+          school: studentFound.school,
+          school_code: studentFound.school_code,
         };
 
         const year = new Date().getFullYear() + "";
@@ -466,58 +469,51 @@ class resultControllers {
         }
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
-  previous_display = async(req, res) => {
-    const { page, searchValue,  parPage } = req.query;
+  previous_display = async (req, res) => {
+    const { page, parPage, searchValue } = req.query;
     const skipPage = parseInt(parPage) * (parseInt(page) - 1);
     try {
-      let previous_result_found=[];
-      if(searchValue.length > 0){
+      let previous_result_found = []
+      if (searchValue.length > 0) {
         previous_result_found = await PreviousResult.find({
-          "personalInfo.email": searchValue,
+          "personalInfo.student_name": searchValue,
         })
           .skip(skipPage)
           .limit(parPage)
-        .sort({ createdAt: 1 });
-      }
-      else{
+          .sort({ roll: 1 });
+      } else {
         previous_result_found = await PreviousResult.find()
           .skip(skipPage)
           .limit(parPage)
-        .sort({ createdAt: 1 });
+          .sort({ "personalInfo.school_code": 1 });
       }
-     
-      
+
       if (previous_result_found) {
-        let final_child_array = [],
-          final_parent_array = [],
-          final_personal_info=[];
+        let final_parent_array = [];
         const keep_previous_data = [...previous_result_found];
         const size = previous_result_found.length;
 
-        for(let i=0 ; i<size ; i++){
-          let { student_name, email, father_name, mother_name } =
-            keep_previous_data[i].personalInfo; 
+        for (let i = 0; i < size; i++) {
+          let { student_name, father_name, mother_name } =
+            keep_previous_data[i].personalInfo;
           let keep_result_object = keep_previous_data[i].result;
           let keys = Object.values(keep_result_object);
-          final_personal_info.push({student_name, email, father_name, mother_name});
-          final_child_array = [];
+
+          // final_personal_info.push({student_name, father_name, mother_name});
+          let final_child_array = [{ student_name, father_name, mother_name }];
 
           const keys_size = keys.length;
-          for(let j=0; j<keys_size ; j++){
+          for (let j = 0; j < keys_size; j++) {
             final_child_array.push(keys[j][0]);
           }
-          console.log(final_child_array) 
-          final_parent_array.push(final_child_array); 
-    
+          final_parent_array.push(final_child_array);
         }
-        
-        console.log(final_parent_array)       
+
         responseReturn(res, 201, {
-          final_personal_info,
           final_parent_array,
           totalData: previous_result_found.length,
           message: "Previous Result Data loaded successfully",
@@ -528,9 +524,9 @@ class resultControllers {
         });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
-  }
+  };
 }
 
 module.exports = new resultControllers();

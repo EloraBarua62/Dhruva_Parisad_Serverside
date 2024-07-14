@@ -44,7 +44,7 @@ class newsControllers {
             message: "News Posted successfully ",
           });
         } catch (error) {
-          responseReturn(res, 500, { error: error.message });
+          responseReturn(res, 500, { error: "Internal Server Error" });
         }
       }
     });
@@ -56,14 +56,21 @@ class newsControllers {
       const count = parseInt(req.query.count);
       const id = process.env.exam_result_date;
       const newsList = await News.find().sort({ updatedAt: -1 }).limit(count);
-      const date = await ExamResultDate.findOne({_id: id});
-      responseReturn(res, 201, {
-        newsList,
-        important_date: { exam_date: date.exam_date, result_date: date.result_date},
-        message: "News list loaded successfully",
-      });
+      const date = await ExamResultDate.findOne({ _id: id });
+      if (newsList.length) {
+        responseReturn(res, 201, {
+          newsList,
+          important_date: {
+            exam_date: date.exam_date,
+            result_date: date.result_date,
+          },
+          message: "News list loaded successfully",
+        });
+      } else {
+        responseReturn(res, 400, { error: "No news is available" });
+      }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -85,7 +92,7 @@ class newsControllers {
         message: "News list loaded successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -96,12 +103,16 @@ class newsControllers {
 
     try {
       const newsFound = await News.updateOne({ _id: id }, { $set: data });
-      responseReturn(res, 201, {
-        newsFound,
-        message: "News updated successfully",
-      });
+      if (newsFound.modifiedCount == 1) {
+        responseReturn(res, 201, {
+          newsFound,
+          message: "News updated successfully",
+        });
+      } else {
+        responseReturn(res, 400, { error: "Failed to update news" });
+      }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -116,10 +127,10 @@ class newsControllers {
           message: "News details deleted successfully",
         });
       } else {
-        responseReturn(res, 500, { error: error.message });
+        responseReturn(res, 500, { error: "Failed to delete" });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -129,13 +140,17 @@ class newsControllers {
     const data = req.body;
 
     try {
-      const dateUpdated = await ExamResultDate.updateOne({ _id: id }, { $set: data });
+      
+      const dateUpdated = await ExamResultDate.updateOne(
+        { _id: id },
+        { $set: data }
+      );
       responseReturn(res, 201, {
         dateUpdated,
         message: "Date updated successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 }

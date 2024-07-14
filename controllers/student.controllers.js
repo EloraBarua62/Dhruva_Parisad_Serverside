@@ -23,7 +23,6 @@ class studentControllers {
           mother_name,
           birth_date,
           phone_no,
-          email,
           zone,
           school,
           subjectYear,
@@ -36,7 +35,6 @@ class studentControllers {
         mother_name = mother_name[0];
         birth_date = birth_date[0];
         phone_no = phone_no[0];
-        email = email[0];
         zone = zone[0];
         school = school[0];
         subjectYear = JSON.parse(subjectYear);
@@ -49,95 +47,78 @@ class studentControllers {
           secure: true,
         });
         try {
-          const studentFound = await Student.findOne({ email });
-          if (studentFound) {
-            responseReturn(res, 404, {
-              error: "You can not register for this exam multiple times",
-            });
-          } else {
-            const result = await cloudinary.uploader.upload(
-              imageShow.filepath,
-              {
-                folder: "dhruva_parishad",
-              }
-            );
+          const result = await cloudinary.uploader.upload(imageShow.filepath, {
+            folder: "dhruva_parishad",
+          });
 
-            console.log(result);
-            const zone_info = await Zone.findOne({ name: zone });
-            const school_info = await School.findOne({
-              school_name: school,
-              zone: zone,
-            });
+          const zone_info = await Zone.findOne({ name: zone });
+          const school_info = await School.findOne({
+            school_name: school,
+            zone: zone,
+          });
 
-            const total_student = await Student.countDocuments({
-              school,
-              zone,
-            });
+          const total_student = await Student.countDocuments({
+            school,
+            zone,
+          });
 
-            const year = new Date().getFullYear() ;
-            const roll =
-              ((year % 1000) * 10000 + school_info.school_code) * 1000 +
-              total_student +
-              1;
+          const year = new Date().getFullYear();
+          const roll =
+            ((year % 1000) * 10000 + school_info.school_code) * 1000 +
+            total_student +
+            1;
+          const createStudent = await Student.create({
+            roll,
+            student_name,
+            father_name,
+            mother_name,
+            birth_date,
+            phone_no,
+            zone,
+            school,
+            school_code: school_info.school_code,
+            imageShow: result.url,
+            subjectYear,
+          });
 
-              console.log(roll)
-            const createStudent = await Student.create({
-              roll,
-              student_name,
-              father_name,
-              mother_name,
-              birth_date,
-              phone_no,
-              email,
-              zone,
-              school,
-              school_code: school_info.school_code,
-              imageShow: result.url,
-              subjectYear,
-            });
+          const studentInfo = {
+            id: createStudent._id,
+            roll,
+            student_name,
+            subjectYear,
+            school_code: school_info.school_code,
+          };
+          let writtenPractical = [];
+          subjectYear.map((data, index) =>
+            writtenPractical.push({
+              written: 0,
+              practical: 0,
+              total: 0,
+              letter_grade: "Null",
+              grade_point: 0,
+            })
+          );
+          const studentResult = await Result.create({
+            studentInfo,
+            writtenPractical,
+          });
 
-            const studentInfo = {
-              id: createStudent._id,
-              roll,
-              student_name,
-              subjectYear,
-              email,
-              school_code: school_info.school_code,
-            };
-            let writtenPractical = [];
-            subjectYear.map((data, index) =>
-              writtenPractical.push({
-                written: 0,
-                practical: 0,
-                total: 0,
-                letter_grade: "Null",
-                grade_point: 0,
-              })
-            );
-            const studentResult = await Result.create({
-              studentInfo,
-              writtenPractical,
-            });
-
-            const id = process.env.exam_result_date;
-            const dateInfo = await ExamResultDate.findOne({
-              _id: id,
-            });
-            responseReturn(res, 201, {
-              exam_date: dateInfo.exam_date,
-              studentDetail: createStudent,
-              message: "Registration successfully completed",
-            });
-          }
+          const id = process.env.exam_result_date;
+          const dateInfo = await ExamResultDate.findOne({
+            _id: id,
+          });
+          responseReturn(res, 201, {
+            exam_date: dateInfo.exam_date,
+            studentDetail: createStudent,
+            message: "Registration successfully completed",
+          });
         } catch (error) {
-          responseReturn(res, 500, { error: error.message });
+          responseReturn(res, 500, { error: 'Internal Server Error' });
         }
       }
     });
   };
 
-  
-  
   // Controller: Update exam registration for previous student
   previous_registration = async (req, res) => {
     const roll = req.params.roll;
@@ -240,9 +221,9 @@ class studentControllers {
             mother_name: student_found.mother_name,
             imageShow: student_found.imageShow,
             roll: new_roll,
-            school,   
-            subjectYear        
-          }
+            school,
+            subjectYear,
+          };
 
           if (result_info_updated.modifiedCount == 1) {
             responseReturn(res, 201, {
@@ -267,7 +248,7 @@ class studentControllers {
         });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -312,7 +293,7 @@ class studentControllers {
         message: "Students info loaded successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -328,7 +309,7 @@ class studentControllers {
         message: "Student info updated successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -349,10 +330,10 @@ class studentControllers {
           message: "Student info deleted successfully",
         });
       } else {
-        responseReturn(res, 500, { error: error.message });
+        responseReturn(res, 400, { error: "Failed to delete" });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 }

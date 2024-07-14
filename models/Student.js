@@ -33,11 +33,6 @@ const studentSchema = new Schema(
       trim: true,
       required: true,
     },
-    email: {
-      type: String,
-      trim: true,
-      required: true,
-    },
     zone: {
       type: String,
       trim: true,

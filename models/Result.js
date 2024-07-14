@@ -12,10 +12,6 @@ const resultSchema = new Schema(
         type: Array,
         required: true,
       },
-      email: {
-        type: String,
-        required: true,
-      },
       school_code: {
         type: Number,
         required: true,

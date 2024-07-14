@@ -9,11 +9,6 @@ const previousResultSchema = new Schema(
         ref: "Student",
         required: true,
       },
-      email: {
-        type: String,
-        trim: true,
-        required: true,
-      },
       student_name: {
         type: String,
         required: true,
@@ -24,6 +19,15 @@ const previousResultSchema = new Schema(
       },
       mother_name: {
         type: String,
+        required: true,
+      },
+      school: {
+        type: String,
+        trim: true,
+        required: true,
+      },
+      school_code: {
+        type: Number,
         required: true,
       },
     },
@@ -37,7 +41,7 @@ const previousResultSchema = new Schema(
 );
 
 previousResultSchema.index({
-  "personalInfo.email": "text",
+  student_name: 'text'
 });
 
 module.exports = model("previousResult", previousResultSchema);

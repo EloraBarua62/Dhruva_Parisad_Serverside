@@ -5,23 +5,20 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { sendEmail } = require("../utils/email");
 
-
 // userControllers class is defined and called
 class userControllers {
   // user signup
   signup = async (req, res) => {
     let { name, email, role, password = 0 } = req.body;
-    console.log(email)
     try {
       const userFound = await User.findOne({ email });
       if (userFound) {
         responseReturn(res, 404, {
           error: "Email already exist, try with another email",
         });
-      } 
-      else {
+      } else {
         // Generate pin number for role: principal
-        let pin_number = '';
+        let pin_number = "";
         if (role === "principal") {
           password = Math.floor(Math.random() * (600000 - 500000)) + 500000;
           password = password.toString();
@@ -29,28 +26,28 @@ class userControllers {
         }
 
         // Add new user
-         const createUser = await User.create({
-            name,
-            email,
-            role,
-            password: await bcrypt.hash(password, 10),
-          });
-       
-          // if role: student, admin => send cookie
-          // if role: principal  => send mail
-        
-          const token = await createToken({
-            email: email,
-            role: createUser.role,
-          });
-          res.cookie("accessToken", token, {
-            httpOnly: false,
-            sameSite: "none",
-            secure: true,
-            expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
-          });
-        
-        if(role === "principal") {
+        const createUser = await User.create({
+          name,
+          email,
+          role,
+          password: await bcrypt.hash(password, 10),
+        });
+
+        // if role: student, admin => send cookie
+        // if role: principal  => send mail
+
+        const token = await createToken({
+          email: email,
+          role: createUser.role,
+        });
+        res.cookie("accessToken", token, {
+          httpOnly: false,
+          sameSite: "none",
+          secure: true,
+          expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
+        });
+
+        if (role === "principal") {
           const message = `Your PIN number is ${pin_number}. Login in our website with this number. Thank you.`;
           await sendEmail({
             email,
@@ -63,7 +60,7 @@ class userControllers {
         const userInfo = {
           name: createUser.name,
           email: createUser.email,
-          role: createUser.role
+          role: createUser.role,
         };
         responseReturn(res, 201, {
           userInfo,
@@ -71,12 +68,10 @@ class userControllers {
         });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
-  
-  
   // user login
   login = async (req, res) => {
     const { email, password } = req.body;
@@ -94,7 +89,7 @@ class userControllers {
           });
           res.cookie("accessToken", token, {
             httpOnly: false,
-            sameSite: 'none',
+            sameSite: "none",
             secure: true,
             expires: new Date(Date.now() + 7 * 24 * 60 * 1000),
           });
@@ -111,12 +106,10 @@ class userControllers {
         responseReturn(res, 404, { error: "Email not found" });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
- 
- 
   // Forgot Password
   forgot_password = async (req, res) => {
     const { email } = req.body;
@@ -132,7 +125,7 @@ class userControllers {
       try {
         await sendEmail({
           email: userFound.email,
-          name : '',
+          name: "",
           subject: "Reset your password",
           message: message,
         });
@@ -143,8 +136,8 @@ class userControllers {
         userFound.passwordResetToken = undefined;
         userFound.passwordResetTokenExpires = undefined;
         userFound.save({ validateBeforeSave: false });
-        console.log(resetUrl);
-        responseReturn(res, 500, { error: error.message });
+  
+        responseReturn(res, 500, { error: "Internal Server Error" });
       }
     } else {
       responseReturn(res, 404, {
@@ -159,8 +152,8 @@ class userControllers {
       .createHash("sha256")
       .update(req.body.token)
       .digest("hex");
-    
-      const user = await User.findOne({
+
+    const user = await User.findOne({
       passwordResetToken: token,
       passwordResetTokenExpires: { $gt: Date.now() },
     });
@@ -207,7 +200,7 @@ class userControllers {
         .limit(parPage);
 
       const totalData = principal_info.length;
-      console.log(principal_info, totalData);
+
       if (totalData > 0) {
         responseReturn(res, 200, {
           principal_info,
@@ -218,7 +211,7 @@ class userControllers {
         responseReturn(res, 404, { error: "Principal info list is empty" });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 }

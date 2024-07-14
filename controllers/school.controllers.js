@@ -25,7 +25,7 @@ class schoolControllers {
         message: "Zone and school data loaded successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -51,7 +51,7 @@ class schoolControllers {
         const zone_value = await Zone.findOne({ name: zone });
         const { code } = zone_value;
         const school_code = code * 1000 + total_school + 1;
-        const principalInfo = { name: principal, email};
+        const principalInfo = { name: principal, email };
         const data = {
           school_name,
           zone,
@@ -68,12 +68,12 @@ class schoolControllers {
           });
         } else {
           responseReturn(res, 400, {
-            error: error.message,
+            error: "Failed to register",
           });
         }
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -94,7 +94,7 @@ class schoolControllers {
         message: "School data loaded successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -114,7 +114,7 @@ class schoolControllers {
         message: "School list loaded successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -135,7 +135,7 @@ class schoolControllers {
         message: "school data updated successfully",
       });
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 
@@ -148,12 +148,11 @@ class schoolControllers {
         responseReturn(res, 201, {
           message: "school data deleted successfully",
         });
-      }
-      else{
-        responseReturn(res, 400, { error: error.message });
+      } else {
+        responseReturn(res, 400, { error: "Failed to delete" });
       }
     } catch (error) {
-      responseReturn(res, 500, { error: error.message });
+      responseReturn(res, 500, { error: "Internal Server Error" });
     }
   };
 }

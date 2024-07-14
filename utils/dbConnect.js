@@ -9,6 +9,6 @@ module.exports.dbConnect = async() => {
         console.log('database connect');
     }
     catch(error){
-        console.log(error.message);
+        console.log('database connection failed');
     }
 }

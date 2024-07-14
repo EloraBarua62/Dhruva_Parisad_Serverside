@@ -10,18 +10,6 @@ const zoneSchema = new Schema(
       type: Number,
       required: true,
     },
-    co_ordinator: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    phone_no: {
-      type: String,
-      required: true,
-    }
   },
   { timestamps: true }
 );
